@@ -1,1 +1,1 @@
-Django>=1.6
+-r requirements/common.txt
