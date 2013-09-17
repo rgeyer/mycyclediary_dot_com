@@ -1,0 +1,3 @@
+[submodule "vendor/python-fitparse"]
+	path = vendor/python-fitparse
+	url = git://github.com/dtcooper/python-fitparse.git
