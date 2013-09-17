@@ -7,7 +7,6 @@ Replace this with more appropriate tests for your application.
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'vendor', 'python-fitparse'))
 from fitparse import Activity
 from django.test import TestCase
 
