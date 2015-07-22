@@ -1,0 +1,25 @@
+<form action="." method="POST">
+{% csrf_token %}
+Select bike:<br/>
+<select name="gear_id">
+{% for bike in athlete.bikes %}
+  <option value="{{ bike.id }}"{% if gear_id == bike.id %} selected{% endif %}>{{ bike.name }}</option>
+{% endfor %}
+</select>
+<br/>
+
+Before Date DD/MM/YYYY:<br/>
+<input type="text" name="before" value="{{ before }}"/><br/>
+
+After Date DD/MM/YYYY:<br/>
+<input type="text" name="after" value="{{ after }}"/>
+</br>
+<input type="submit" name="Submit" />
+</form>
+</br>
+
+Distance {{ distance }}<br/>
+Time {{ time }}<br/>
+Elevation {{ elevation }}<br/>
+Avg Speed {{ avg_speed }}<br/>
+Kilojoules {{ kjs }}<br/>

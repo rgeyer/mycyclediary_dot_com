@@ -1,0 +1,11 @@
+cyclediarycache:
+  image: memcached
+cyclediaryweb:
+  build: .
+  command: python manage.py runserver 0.0.0.0:80
+  volumes:
+    - .:/code
+  ports:
+    - "80:80"
+  links:
+    - cyclediarycache

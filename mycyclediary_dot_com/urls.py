@@ -6,7 +6,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'mycyclediary_dot_com.views.index', name='index'),
+    url(r'^$', 'mycyclediary_dot_com.apps.www.views.index', name='index'),
+    url(r'^strava/', include('mycyclediary_dot_com.apps.strava.urls')),
     # url(r'^mycyclediary_dot_com/', include('mycyclediary_dot_com.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
