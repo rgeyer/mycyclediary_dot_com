@@ -3,9 +3,11 @@ cyclediarycache:
 cyclediaryweb:
   build: .
   command: python manage.py runserver 0.0.0.0:80
+  environment:
+    - VIRTUAL_HOST=dev.mycyclediary.com
   volumes:
     - .:/code
-  ports:
-    - "80:80"
+  expose:
+    - 80
   links:
     - cyclediarycache
