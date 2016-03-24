@@ -8,4 +8,5 @@ virtualenv:
 install:
   - "pip install -r requirements/test.txt --use-mirrors"
   - "pip install https://github.com/rgeyer/python-fitparse/tarball/master"
+  - "cp ./mycyclediary_dot_com/settings/secrets.py.example ./mycyclediary_dot_com/settings/secrets.py"
 script: "./manage.py test api"
