@@ -1,3 +1,8 @@
 Django>=1.8
 stravalib
 python-memcached
+pymongo>=3.2
+jsonpickle
+python-social-auth
+celery
+django-celery

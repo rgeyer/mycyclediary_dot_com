@@ -1,5 +1,22 @@
 cyclediarycache:
   image: memcached
+cyclediarymongo1:
+  image: mongo
+  volumes:
+    - ./mongobkup:/mongobkup
+cyclediaryqueue:
+  image: rabbitmq
+cyclediaryworker:
+  build: .
+  environment:
+    - C_FORCE_ROOT=yes
+  command: celery -A mycyclediary_dot_com worker -l debug
+  volumes:
+    - .:/code
+  links:
+    - cyclediarycache
+    - cyclediarymongo1
+    - cyclediaryqueue
 cyclediaryweb:
   build: .
   command: python manage.py runserver 0.0.0.0:80
@@ -11,3 +28,5 @@ cyclediaryweb:
     - 80
   links:
     - cyclediarycache
+    - cyclediarymongo1
+    - cyclediaryqueue

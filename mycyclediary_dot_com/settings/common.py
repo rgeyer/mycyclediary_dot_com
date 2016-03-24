@@ -1,8 +1,17 @@
 # Django settings for mycyclediary_dot_com project.
 import os
 
+from secrets import *
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+LOGIN_URL = '/connect'
+
+BROKER_URL='amqp://guest:guest@'+os.environ['CYCLEDIARYQUEUE_1_PORT_5672_TCP_ADDR']+':'+os.environ['CYCLEDIARYQUEUE_1_PORT_5672_TCP_PORT']+'//'
+# BROKER_URL='amqp://guest:guest@localhost//'
+CELERY_IMPORTS=("mycyclediary_dot_com.apps.strava.tasks",)
+
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -29,7 +38,15 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
-    }
+    },
+    # 'mongo': {
+    #     'ENGINE': 'django_mongodb_engine',
+    #     'NAME': 'mycycledairy_dot_com_mongodb',
+    #     'HOST': os.environ['CYCLEDIARYMONGO1_PORT_27017_TCP_ADDR'],
+    #     'PORT': os.environ['CYCLEDIARYMONGO1_PORT_27017_TCP_PORT'],
+    #     'USER': '',
+    #     'PASSWORD': '',
+    # },
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -83,6 +100,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(BASE_DIR, "mycyclediary_dot_com/static"),
 )
 
 # List of finder classes that know how to find static files in
@@ -101,10 +119,11 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            'mycyclediary_dot_com/apps/strava/templates'
+            'mycyclediary_dot_com/apps'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
+            'debug': True,
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
@@ -135,12 +154,6 @@ ROOT_URLCONF = 'mycyclediary_dot_com.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'mycyclediary_dot_com.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -148,11 +161,70 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mycyclediary_dot_com.apps.api',
+    'mycyclediary_dot_com',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'social.apps.django_app.default',
+    'djcelery',
+)
+
+AUTHENTICATION_BACKENDS = [
+    'social.backends.strava.StravaOAuth',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+AUTH_USER_MODEL = 'mycyclediary_dot_com.athlete'
+
+SOCIAL_AUTH_PIPELINE = (
+    # Get the information we can about the user and return it in a simple
+    # format to create the user instance later. On some cases the details are
+    # already part of the auth response from the provider, but sometimes this
+    # could hit a provider API.
+    'social.pipeline.social_auth.social_details',
+
+    # Get the social uid from whichever service we're authing thru. The uid is
+    # the unique identifier of the given user in the provider.
+    'social.pipeline.social_auth.social_uid',
+
+    # Verifies that the current auth process is valid within the current
+    # project, this is were emails and domains whitelists are applied (if
+    # defined).
+    'social.pipeline.social_auth.auth_allowed',
+
+    # Checks if the current social-account is already associated in the site.
+    'social.pipeline.social_auth.social_user',
+
+    # Make up a username for this person, appends a random string at the end if
+    # there's any collision.
+    'social.pipeline.user.get_username',
+
+    # Send a validation email to the user to verify its email address.
+    # 'social.pipeline.mail.mail_validation',
+
+    # Associates the current social details with another user account with
+    # a similar email address.
+    # 'social.pipeline.social_auth.associate_by_email',
+
+    # Create a user account if we haven't found one yet.
+    'social.pipeline.user.create_user',
+
+    # Create the record that associated the social account with this user.
+    'social.pipeline.social_auth.associate_user',
+
+    # Populate the extra_data field in the social record with the values
+    # specified by settings (and the default ones like access_token, etc).
+    'social.pipeline.social_auth.load_extra_data',
+
+    # Update the user record with any changed info from the auth service.
+    'social.pipeline.user.user_details',
+
+    # Duplicate some stuff from the Strava user principle into the athlete model
+    'mycyclediary_dot_com.libs.python_auth.pipeline.user_details',
+
+    # Do the initial strava sync if it hasn't been done already
+    'mycyclediary_dot_com.libs.python_auth.pipeline.first_sync',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -163,6 +235,11 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '%(levelname)s %(asctime)s [%(name)s] - %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -173,13 +250,34 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/debug.log',
+            'formatter': 'default',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default'
+        },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        'mycyclediary_dot_com.management.commands.dbstuff': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        '': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propogate': True,
         },
     }
 }

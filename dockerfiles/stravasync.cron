@@ -1,0 +1,2 @@
+* * * * * root cd /var/lib/docker-compose/mycyclediary_dot_com && docker-compose run cyclediaryweb manage.py dbstuff >> /var/log/cron.log 2>&1
+* */1 * * * root docker exec mycyclediarydotcom_cyclediarymongo1_1 mongodump -o /mongobkup >> /var/log/cron.log 2>&1

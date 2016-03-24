@@ -1,0 +1,6 @@
+{% extends "www/templates/layout.html" %}
+{% block title %}My Cycle Diary Login{% endblock %}
+{% block body %}
+<p>Hey, this works best when you're logged in with your Strava connection. 'Cause, you know, we use that data n' stuff</p>
+<a href="{% url 'social:begin' 'strava' %}?next=/"><img src="/static/ConnectWithStrava.png"/></a>
+{% endblock %}
