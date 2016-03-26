@@ -61,7 +61,14 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
-            <li><a href="/logout">Logout</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{user.first_name}} <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li class="disabled"><a href="#">Last Strava Sync {{user.last_strava_sync|date:"c"}}</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+            </li>
             {% else %}
             <li><a href="/connect">Login</a></li>
             {% endif %}

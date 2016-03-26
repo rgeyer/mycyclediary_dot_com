@@ -42,11 +42,11 @@ def index(request):
     before = request.POST.get('before')
     after = request.POST.get('after')
     if before and after:
-        before = datetime.datetime.strptime(before, '%Y-%m-%d')
-        after = datetime.datetime.strptime(after, '%Y-%m-%d')
+        before = datetime.datetime.strptime(before, '%Y-%m-%d') + timedelta(hours=23, minutes=59, seconds=59)
+        after = datetime.datetime.strptime(after, '%Y-%m-%d') + timedelta(hours=23, minutes=59, seconds=59)
     else:
-        before = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-        after = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=7)
+        before = datetime.datetime.today().replace(hour=23, minute=59, second=59, microsecond=0)
+        after = before - timedelta(days=7)
 
     stra = strava()
     filters = [
