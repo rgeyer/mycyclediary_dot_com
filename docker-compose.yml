@@ -21,7 +21,7 @@ cyclediaryweb:
   build: .
   command: python manage.py runserver 0.0.0.0:80
   environment:
-    - VIRTUAL_HOST=dev.mycyclediary.com
+    - VIRTUAL_HOST=app.mycyclediary.com
   volumes:
     - .:/code
   expose:

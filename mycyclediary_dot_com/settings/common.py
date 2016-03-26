@@ -11,6 +11,8 @@ BROKER_URL='amqp://guest:guest@'+os.environ['CYCLEDIARYQUEUE_1_PORT_5672_TCP_ADD
 # BROKER_URL='amqp://guest:guest@localhost//'
 CELERY_IMPORTS=("mycyclediary_dot_com.apps.strava.tasks",)
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
 DEBUG = True
 
 ADMINS = (
