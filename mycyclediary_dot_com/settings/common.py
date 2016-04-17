@@ -272,7 +272,7 @@ LOGGING = {
             'propagate': True,
         },
         'mycyclediary_dot_com.management.commands.dbstuff': {
-            'handlers': ['console'],
+            'handlers': ['console','file'],
             'level': 'DEBUG',
             'propogate': True,
         },
