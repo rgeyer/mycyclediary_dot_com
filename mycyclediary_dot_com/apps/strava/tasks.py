@@ -11,10 +11,12 @@ from datetime import datetime
 
 import logging
 
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 @app.task(name='mycyclediary_dot_com.apps.strava.tasks.update_athlete')
 def update_athlete(athlete):
-    logger = logging.getLogger(__name__)
     capture_datetime = timezone.now()
     capture_timestamp = int(capture_datetime.strftime('%s'))
 
@@ -24,13 +26,25 @@ def update_athlete(athlete):
     collection = mongoh.get_collection('raw_activities')
 
     token = athlete.strava_api_token
+    stravahelper = strava(token)
     after_timestamp = None
     if athlete.last_strava_sync:
-        after_timestamp = int(athlete.last_strava_sync.strftime('%s'))
+        filters = [
+            {'field': 'athlete.id', 'query': request.user.strava_id}
+        ]
+        max_record = stra.aggregate_activities_mongo(filters, {
+            '_id': None,
+            'max_start_date': {'$max': '$start_date'},
+        })
+
+        record = None
+        for agg in max_record:
+            if not record:
+                record = agg
+        after_timestamp = int(record['max_start_date'].strftime('%s'))
 
     logger.debug("After dbstring = {} timestamp = {}".format(athlete.last_strava_sync.strftime('%c'), after_timestamp))
 
-    stravahelper = strava(token)
     activities = stravahelper.get_athlete_activities_api(after=after_timestamp)
 
     for activity in activities:
