@@ -9,11 +9,17 @@ from django.utils import timezone
 
 from datetime import datetime
 
+import logging
+
 
 @app.task(name='mycyclediary_dot_com.apps.strava.tasks.update_athlete')
 def update_athlete(athlete):
+    logger = logging.getLogger(__name__)
     capture_datetime = timezone.now()
     capture_timestamp = int(capture_datetime.strftime('%s'))
+
+    logger.debug("Starting update for athlete {}. Capture datetime = {} timestamp = {}".format(athlete.id, capture_datetime.strftime('%c'), capture_timestamp))
+
     mongoh = mongohelper()
     collection = mongoh.get_collection('raw_activities')
 
@@ -21,6 +27,8 @@ def update_athlete(athlete):
     after_timestamp = None
     if athlete.last_strava_sync:
         after_timestamp = int(athlete.last_strava_sync.strftime('%s'))
+
+    logger.debug("After dbstring = {} timestamp = {}".format(athlete.last_strava_sync.strftime('%c'), after_timestamp))
 
     stravahelper = strava(token)
     activities = stravahelper.get_athlete_activities_api(after=after_timestamp)
