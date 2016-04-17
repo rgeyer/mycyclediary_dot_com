@@ -30,9 +30,9 @@ def update_athlete(athlete):
     after_timestamp = None
     if athlete.last_strava_sync:
         filters = [
-            {'field': 'athlete.id', 'query': request.user.strava_id}
+            {'field': 'athlete.id', 'query': athlete.strava_id}
         ]
-        max_record = stra.aggregate_activities_mongo(filters, {
+        max_record = stravahelper.aggregate_activities_mongo(filters, {
             '_id': None,
             'max_start_date': {'$max': '$start_date'},
         })
