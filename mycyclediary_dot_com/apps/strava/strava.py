@@ -40,6 +40,7 @@ class strava:
         while just_keep_looping:
             self.logger.debug("Requesting with "+str(params))
             activity_batch = client.protocol.get('/athlete/activities', **params)
+            self.logger.debug("Activity request batch response is "+type(activity_batch).__name__)
             activities.extend(activity_batch)
             self.logger.debug("Got "+str(len(activity_batch))+" in this batch, and the total activities are "+str(len(activities)))
 

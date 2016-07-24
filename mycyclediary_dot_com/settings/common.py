@@ -259,6 +259,12 @@ LOGGING = {
             'filename': 'logs/debug.log',
             'formatter': 'default',
         },
+        'celery-tasks': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/celery-tasks.log',
+            'formatter': 'default',
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -275,6 +281,21 @@ LOGGING = {
             'handlers': ['console','file'],
             'level': 'DEBUG',
             'propogate': True,
+        },
+        'mycyclediary_dot_com.apps.strava.tasks': {
+            'handlers': ['console','celery-tasks'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'mycyclediary_dot_com.apps.strava.strava': {
+            'handlers': ['console','celery-tasks'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'celery': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         '': {
             'handlers': ['file'],

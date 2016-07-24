@@ -41,7 +41,11 @@ def update_athlete(athlete):
         for agg in max_record:
             if not record:
                 record = agg
-        after_timestamp = int(record['max_start_date'].strftime('%s'))
+
+        if record:
+            after_timestamp = int(record['max_start_date'].strftime('%s'))
+        else:
+            after_timestamp = capture_timestamp - 604800
 
     logger.debug("After dbstring = {} timestamp = {}".format(athlete.last_strava_sync.strftime('%c'), after_timestamp))
 
