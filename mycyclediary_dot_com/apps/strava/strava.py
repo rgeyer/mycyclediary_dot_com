@@ -35,7 +35,12 @@ class strava:
 
         just_keep_looping = True
         activities = []
-        params = {'per_page': per_page, 'after': after, 'before': before}
+        params = {'per_page': per_page}
+        if after:
+            params['after'] = after
+
+        if before:
+            params['before'] = before
 
         while just_keep_looping:
             self.logger.debug("Requesting with "+str(params))
