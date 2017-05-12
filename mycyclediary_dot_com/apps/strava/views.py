@@ -32,6 +32,65 @@ def __get_strava_client(request):
 
 @login_required
 def index(request):
+    template_fields = {
+        'bikes': {},
+        'activities': [],
+        # 'distance': unithelper.miles(unit('m')(0)),
+        # 'time': unithelper.hours(unit('s')(0)),
+        # 'elevation': unithelper.meters(unit('m')(0)),
+        # 'avg_speed': unithelper.mph(unit('m')(0)/unit('s')(1)),
+    }
+
+    stra = strava()
+    filters = [
+        {'field': 'athlete.id', 'query': request.user.strava_id},
+    ]
+    template_fields['activites'] = stra.get_activities_mongo(filters)
+
+    bikes = request.user.gear_set.all()
+    for bike in bikes:
+        filters = [
+            {'field': 'athlete.id', 'query': request.user.strava_id},
+            {'field': 'gear_id', 'query': bike.strava_id},
+        ]
+        activities = stra.aggregate_activities_mongo(filters, {
+            '_id': None,
+            'distance': {'$sum': '$distance'},
+            'elapsed_time': {'$sum': '$moving_time'},
+            'elevation': {'$sum': '$total_elevation_gain'},
+            'average_speed': {'$avg': '$average_speed'},
+            'kilojoules': {'$sum': '$kilojoules'},
+        })
+
+        template_fields['bikes'][bike.strava_id] = {
+            'bike': bike,
+            'distance': unithelper.miles(unit('m')(0)),
+            'time': unithelper.hours(unit('s')(0)),
+            'elevation': unithelper.meters(unit('m')(0)),
+            'avg_speed': unithelper.mph(unit('m')(0)/unit('s')(1)),
+            'kjs': 0,
+        }
+
+        activity = None
+        for agg in activities:
+            if not activity:
+                activity = agg
+
+        if activity:
+            merge_dict = template_fields['bikes'][bike.strava_id].copy()
+            merge_dict.update({
+                'distance': unithelper.miles(unit('m')(activity['distance'])),
+                'time': unithelper.hours(unit('s')(activity['elapsed_time'])),
+                'elevation': unithelper.meters(unit('m')(activity['elevation'])),
+                'avg_speed': unithelper.mph(unit('m')(activity['average_speed'])/unit('s')(1)),
+                'kjs': activity['kilojoules'],
+            })
+            template_fields['bikes'][bike.strava_id] = merge_dict            
+
+    return render_to_response('strava/templates/strava_index.html', template_fields, context_instance=RequestContext(request))
+
+@login_required
+def bike_stats(request):
     primary_bike_id = ''
     bikes = request.user.gear_set.all()
     for bike in bikes:
@@ -90,4 +149,4 @@ def index(request):
         })
         template_fields = merge_dict
 
-    return render_to_response('strava/templates/strava_index.html', template_fields, context_instance=RequestContext(request))
+    return render_to_response('strava/templates/strava_bike_stats.html', template_fields, context_instance=RequestContext(request))

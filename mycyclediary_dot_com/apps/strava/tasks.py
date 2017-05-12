@@ -9,11 +9,43 @@ from django.utils import timezone
 
 from datetime import datetime
 
-import logging
+import logging, json
 
 from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
+
+# TODO: This is deliberatly very heavy handed, and does not throttle, nor respect
+# rate limiting from strava. Will have to ultimately make this smarter when/if
+# this becomes a tool that anyone besides I use.
+@app.task(name='mycyclediary_dot_com.apps.strava.tasks.upgrade_athlete_activity_resource_states')
+def upgrade_athlete_activity_resource_states(athlete):
+    mongoh = mongohelper()
+    state2 = mongoh.get_collection('raw_activities_resource_state_2')
+    state3 = mongoh.get_collection('raw_activities_resource_state_3')
+
+    token = athlete.strava_api_token
+    stravahelper = strava(token)
+
+    filters = [
+        {'field': 'athlete.id', 'query': athlete.strava_id},
+        {'field': 'upgraded_to_resource_state_3', 'query': {'$exists': False}}
+    ]
+    to_upgrade = mongoh.filter(state2, filters)
+    total = 0
+    for activity in to_upgrade:
+        total = total + 1
+        logger.debug("Upgrading activity {} to resource_state 3 (Detailed view)".format(activity['_id']))
+        detailed_activity = stravahelper.get_activity_api(activity['_id'])
+
+        detailed_activity['_id'] = activity['_id']
+        detailed_activity['start_date'] = activity['start_date']
+        detailed_activity['strava_api_version'] = 3
+
+        state3.replace_one({'_id': activity['_id']}, detailed_activity, upsert=True)
+        state2.update_one({'_id': activity['_id']}, {'$set': {'upgraded_to_resource_state_3': True}})
+
+    logger.debug("Found {} records for athlete {} which need to be upgraded to resource_state_3".format(total, athlete.strava_id))
 
 @app.task(name='mycyclediary_dot_com.apps.strava.tasks.update_athlete')
 def update_athlete(athlete):
@@ -23,7 +55,7 @@ def update_athlete(athlete):
     logger.debug("Starting update for athlete {}. Capture datetime = {} timestamp = {}".format(athlete.id, capture_datetime.strftime('%c'), capture_timestamp))
 
     mongoh = mongohelper()
-    collection = mongoh.get_collection('raw_activities')
+    collection = mongoh.get_collection('raw_activities_resource_state_2')
 
     token = athlete.strava_api_token
     stravahelper = strava(token)
@@ -47,7 +79,9 @@ def update_athlete(athlete):
         else:
             after_timestamp = capture_timestamp - 604800
 
-    logger.debug("After dbstring = {} timestamp = {}".format(athlete.last_strava_sync.strftime('%c'), after_timestamp))
+    lastsync = athlete.last_strava_sync.strftime('%c') if athlete.last_strava_sync else "null"
+
+    logger.debug("After dbstring = {} timestamp = {}".format(lastsync, after_timestamp))
 
     activities = stravahelper.get_athlete_activities_api(after=after_timestamp)
 

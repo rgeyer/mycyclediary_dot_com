@@ -1,35 +1,9 @@
 {% extends "www/templates/layout.html" %}
-{% block title %}My Cycle Diary - Strava Distance Calculator{% endblock %}
+{% block title %}My Cycle Diary - Strava Activities{% endblock %}
 {% block body %}
-{% if not user.last_strava_sync %}
-<h1>Still loading your data, try reloading in a sec</h1>
-{% else %}
-<form class="form-horizontal" action="." method="POST">
-{% csrf_token %}
-  <div class="form-group">
-    <label for="gear_id">Bike</label>
-    <select name="gear_id" class="form-control">
-    {% for bike in bikes %}
-      <option value="{{ bike.strava_id }}"{% if gear_id == bike.strava_id %} selected{% endif %}>{{ bike.name }}</option>
-    {% endfor %}
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="before">Before Date</label>
-    <input type="date" class="form-control" name="before" value="{{ before }}"/>
-  </div>
-  <div class="form-group">
-    <label for="after">After Date</label>
-    <input type="date" class="form-control" name="after" value="{{ after }}"/>
-  </div>
-<button class="btn btn-primary" type="submit">Submit</button>
-</form>
-</br>
-
-Distance {{ distance }}<br/>
-Time {{ time }}<br/>
-Elevation {{ elevation }}<br/>
-Avg Speed {{ avg_speed }}<br/>
-Kilojoules {{ kjs }}<br/>
-{% endif %}
+<ul>
+{% for bikeid, bike in bikes.iteritems %}
+  <li>{{bike.bike.name}}: {{bike.distance}} {{bike.elevation}}</li>
+{% endfor %}
+</ul>
 {% endblock %}

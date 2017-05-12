@@ -39,8 +39,11 @@ class gear(models.Model):
         except:
             return False
 
-class bike(gear):
-    pass
-
-class shoe(gear):
-    pass
+# class bike(gear):
+#     pass
+#
+# class shoe(gear):
+#     pass
+#
+# class bike_component(models.Model):
+#     pass

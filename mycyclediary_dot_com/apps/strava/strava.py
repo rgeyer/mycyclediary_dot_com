@@ -4,12 +4,12 @@ import logging
 
 class strava:
 
-    def _assemble_mongo_filters(self, filters):
-        filter_dict = {}
-        for filter in filters:
-            filter_dict[filter['field']] = filter['query']
-
-        return filter_dict
+    # def _assemble_mongo_filters(self, filters):
+    #     filter_dict = {}
+    #     for filter in filters:
+    #         filter_dict[filter['field']] = filter['query']
+    #
+    #     return filter_dict
 
     def __init__(self, access_token=None):
         self.logger = logging.getLogger(__name__)
@@ -29,6 +29,10 @@ class strava:
         client = self.get_client()
         athlete = client.get_athlete()
         return athlete.bikes, athlete.shoes
+
+    def get_activity_api(self, activity_id):
+        client = self.get_client()
+        return client.protocol.get('/activities/{}'.format(activity_id))
 
     def get_athlete_activities_api(self, before=None, after=None, per_page=200):
         client = self.get_client()
@@ -59,13 +63,11 @@ class strava:
         return activities
 
     def get_activities_mongo(self, filters=[]):
-        filter_dict = self._assemble_mongo_filters(filters)
         mongoh = mongohelper()
-        mongo = mongoh.get_collection('raw_activities')
-        return mongo.find(filter_dict)
+        mongo = mongoh.get_collection('raw_activities_resource_state_3')
+        return mongoh.filter(mongo,filters)
 
     def aggregate_activities_mongo(self, filters=[], aggregate={}):
-        filter_dict = self._assemble_mongo_filters(filters)
         mongoh = mongohelper()
-        mongo = mongoh.get_collection('raw_activities')
-        return mongo.aggregate([{'$match': filter_dict}, {'$group': aggregate}])
+        mongo = mongoh.get_collection('raw_activities_resource_state_3')
+        return mongoh.aggregate(mongo, filters, aggregate)

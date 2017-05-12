@@ -265,6 +265,12 @@ LOGGING = {
             'filename': 'logs/celery-tasks.log',
             'formatter': 'default',
         },
+        'stravalib': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/stravalib.log',
+            'formatter': 'default',
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -296,6 +302,11 @@ LOGGING = {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'stravalib': {
+            'handlers': ['stravalib']
+            'level': 'DEBUG',
+            'propogate': True,
         },
         '': {
             'handlers': ['file'],
