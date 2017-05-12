@@ -304,7 +304,7 @@ LOGGING = {
             'propagate': True,
         },
         'stravalib': {
-            'handlers': ['stravalib']
+            'handlers': ['stravalib'],
             'level': 'DEBUG',
             'propogate': True,
         },
