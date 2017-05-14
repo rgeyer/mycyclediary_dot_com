@@ -8,11 +8,12 @@ from django.template import RequestContext
 from datetime import timedelta
 from mycyclediary_dot_com.settings.secrets import *
 from mycyclediary_dot_com.apps.strava.models import athlete
+from mycyclediary_dot_com.apps.strava.models import bike as bike_odm
 from django.contrib.auth.decorators import login_required
 from mycyclediary_dot_com.apps.strava.strava import strava
 from units import unit
 
-import os, time, datetime, logging
+import os, time, datetime, logging, json
 
 def __conditional_sum_quantity(old, new):
     if old:
@@ -32,6 +33,7 @@ def __get_strava_client(request):
 
 @login_required
 def index(request):
+    logger = logging.getLogger(__name__)
     template_fields = {
         'bikes': {},
         'activities': [],
@@ -43,11 +45,16 @@ def index(request):
 
     stra = strava()
     filters = [
-        {'field': 'athlete.id', 'query': request.user.strava_id},
+        {'field': 'athlete.id', 'query': int(request.user.strava_id)},
     ]
-    template_fields['activites'] = stra.get_activities_mongo(filters)
+    activities = stra.get_activities_mongo(filters)
+    for activity in activities:
+        logger.debug(u"Activity inside of activities is {}. Name is {}".format(type(activity).__name__, activity['name']))
+        template_fields["activities"].append(activity)
 
-    bikes = request.user.gear_set.all()
+    logger.debug("request user object type is "+type(request.user).__name__)
+    logger.debug("There are {} activities".format(len(template_fields['activities'])))
+    bikes = bike_odm.objects.filter(athlete=request.user.id)
     for bike in bikes:
         filters = [
             {'field': 'athlete.id', 'query': request.user.strava_id},
@@ -85,14 +92,14 @@ def index(request):
                 'avg_speed': unithelper.mph(unit('m')(activity['average_speed'])/unit('s')(1)),
                 'kjs': activity['kilojoules'],
             })
-            template_fields['bikes'][bike.strava_id] = merge_dict            
+            template_fields['bikes'][bike.strava_id] = merge_dict
 
     return render_to_response('strava/templates/strava_index.html', template_fields, context_instance=RequestContext(request))
 
 @login_required
 def bike_stats(request):
     primary_bike_id = ''
-    bikes = request.user.gear_set.all()
+    bikes = bike_odm.objects.filter(athlete=request.user.id)
     for bike in bikes:
         if bike.primary:
             primary_bike_id = bike.strava_id

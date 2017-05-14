@@ -52,7 +52,7 @@ def update_athlete(athlete):
     capture_datetime = timezone.now()
     capture_timestamp = int(capture_datetime.strftime('%s'))
 
-    logger.debug("Starting update for athlete {}. Capture datetime = {} timestamp = {}".format(athlete.id, capture_datetime.strftime('%c'), capture_timestamp))
+    logger.debug("Starting update for athlete {} - {}. Capture datetime = {} timestamp = {}".format(athlete.id, athlete.email, capture_datetime.strftime('%c'), capture_timestamp))
 
     mongoh = mongohelper()
     collection = mongoh.get_collection('raw_activities_resource_state_2')
@@ -85,6 +85,8 @@ def update_athlete(athlete):
 
     activities = stravahelper.get_athlete_activities_api(after=after_timestamp)
 
+    logger.debug("Got athlete activities, upserting them")
+
     for activity in activities:
         activity['_id'] = activity['id']
         activity['capture_timestamp'] = capture_timestamp
@@ -96,8 +98,12 @@ def update_athlete(athlete):
 
     bikes,shoes = stravahelper.get_athlete_gear_api()
 
+    logger.debug("Updating athlete gear. Found {} bikes and {} shoes, iterating them now.".format(len(bikes), len(shoes)))
+
     for api_bike in bikes:
+        logger.debug("Before instantiating a bike")
         db_bike = bike()
+        logger.debug("After instantiating a bike")
         db_bike.strava_id = api_bike.id
         db_bike.athlete = athlete
         db_bike.primary = api_bike.primary
@@ -107,6 +113,8 @@ def update_athlete(athlete):
         db_bike.brand_name = api_bike.brand_name
         db_bike.model_name = api_bike.model_name
         db_bike.frame_type = api_bike.frame_type
+        logger.debug("After setting all the stuff for a bike")
         db_bike.save()
+        logger.debug("After saving the bike")
 
     athlete.save()

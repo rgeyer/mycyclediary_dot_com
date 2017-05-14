@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import os
+import os, logging
 
 class mongohelper:
     def _assemble_mongo_filters(self, filters):
@@ -20,6 +20,8 @@ class mongohelper:
 
     def filter(self, collection, filters=[]):
         mongo_filters = self._assemble_mongo_filters(filters)
+        logger = logging.getLogger(__name__)
+        logger.debug("Querying mongo with filterset {}".format(mongo_filters))
         return collection.find(mongo_filters)
 
     def aggregate(self, collection, filters=[], aggregate={}):

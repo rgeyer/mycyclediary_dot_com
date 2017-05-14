@@ -8,6 +8,10 @@ class athlete(AbstractUser):
     strava_id = models.PositiveIntegerField(blank=True,null=True)
     last_strava_sync = models.DateTimeField(blank=True,null=True)
     strava_api_token = models.CharField(blank=True,null=True,max_length=64)
+    # This apparently also get's a "gear_set" associated with it somewhere.
+    # That happens only on new logins, and needs to be updated. Maybe this needs
+    # to be checked dynamically?
+    # Ahhh this is how that happens.. https://github.com/omab/python-social-auth/blob/v0.2.14/social/backends/strava.py
 
 class gear(models.Model):
     class Meta:
@@ -39,9 +43,9 @@ class gear(models.Model):
         except:
             return False
 
-# class bike(gear):
-#     pass
-#
+class bike(gear):
+    pass
+
 # class shoe(gear):
 #     pass
 #

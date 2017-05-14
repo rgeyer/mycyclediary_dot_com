@@ -3,3 +3,5 @@
 *.iml
 mycyclediary_dot_com_sqlite3
 mongobkup
+.DS_Store
+._*

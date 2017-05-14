@@ -58,16 +58,19 @@ class strava:
             else:
                 params['page'] = params['page']+1
 
+            self.logger.debug("Before checking keep looping")
+
             just_keep_looping = (len(activity_batch) == per_page)
+            self.logger.debug("Just keep looping value is {}".format(just_keep_looping))
 
         return activities
 
     def get_activities_mongo(self, filters=[]):
         mongoh = mongohelper()
-        mongo = mongoh.get_collection('raw_activities_resource_state_3')
+        mongo = mongoh.get_collection('raw_activities_resource_state_2')
         return mongoh.filter(mongo,filters)
 
     def aggregate_activities_mongo(self, filters=[], aggregate={}):
         mongoh = mongohelper()
-        mongo = mongoh.get_collection('raw_activities_resource_state_3')
+        mongo = mongoh.get_collection('raw_activities_resource_state_2')
         return mongoh.aggregate(mongo, filters, aggregate)
