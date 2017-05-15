@@ -5,4 +5,5 @@ urlpatterns = [
     # Examples:
     url(r'^$', views.index, name='index'),
     url(r'^bike_stats$', views.bike_stats, name='bike_stats'),
+    url(r'^webhook$', views.webhook, name='webhook'),
 ]

@@ -10,6 +10,7 @@ urlpatterns = [
     url('', include('django.contrib.auth.urls', namespace='auth')),
     url(r'^$', mycyclediary_dot_com.apps.www.views.index, name='index'),
     url(r'^strava/', include('mycyclediary_dot_com.apps.strava.urls')),
+    url(r'^api/', include('mycyclediary_dot_com.apps.api.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

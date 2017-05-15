@@ -7,13 +7,16 @@ from django.template.loader import get_template
 from django.template import RequestContext
 from datetime import timedelta
 from mycyclediary_dot_com.settings.secrets import *
-from mycyclediary_dot_com.apps.strava.models import athlete
+from mycyclediary_dot_com.apps.strava.models import athlete, strava_webhook_subscription
 from mycyclediary_dot_com.apps.strava.models import bike as bike_odm
 from django.contrib.auth.decorators import login_required
 from mycyclediary_dot_com.apps.strava.strava import strava
 from units import unit
+from requests import * # Maybe wanna use django requests, but I'm so much more familiar with these!
 
-import os, time, datetime, logging, json
+from django.conf import settings
+
+import os, time, datetime, logging, json, uuid, urllib
 
 def __conditional_sum_quantity(old, new):
     if old:
@@ -157,3 +160,34 @@ def bike_stats(request):
         template_fields = merge_dict
 
     return render_to_response('strava/templates/strava_bike_stats.html', template_fields, context_instance=RequestContext(request))
+
+@login_required
+def webhook(request):
+    template_fields = {}
+
+    if request.method == 'POST' and 'enable_webhook' in request.POST:
+        uuid_hex = uuid.uuid1().hex
+        new_sub = strava_webhook_subscription(
+            verify_token=uuid_hex,
+            athlete=athlete.objects.get(id=request.user.id),
+        )
+        new_sub.save()
+
+        ### Request a subscription from the API
+        uri = "https://api.strava.com/api/v3/push_subscriptions"
+        body = "client_id={}&client_secret={}&object_type=activity&aspect_type=create&callback_url={}&verify_token={}".format(
+            SOCIAL_AUTH_STRAVA_KEY,
+            SOCIAL_AUTH_STRAVA_SECRET,
+            "https://app.mycyclediary.com/api/strava/webhook",
+            new_sub.verify_token,
+        )
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        session = Session()
+        webhook_response = session.post(uri, headers=headers, data=urllib.urlencode(body))
+        # TODO: Error handling, and other smart stuff
+
+
+    subscriptions = strava_webhook_subscription.objects.filter(athlete=request.user.id)
+    template_fields["subscriptions"] = subscriptions
+
+    return render_to_response('strava/templates/strava_webhook.html', template_fields, context_instance=RequestContext(request))

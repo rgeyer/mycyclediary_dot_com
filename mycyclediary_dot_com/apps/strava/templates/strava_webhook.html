@@ -1,0 +1,39 @@
+{% extends "www/templates/layout.html" %}
+{% block title %}My Cycle Diary - Strava Webhook Status{% endblock %}
+{% block body %}
+{% if subscriptions %}
+<p>Found Some Subscriptions</p>
+<table id="subscriptions" class="display">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Object Type(s)</th>
+      <th>Aspect(s)</th>
+      <th>Created</th>
+      <th>Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for subscription in subscriptions %}
+    <tr>
+      <td>{{subscription.strava_id}}</td>
+      <td>{{subscription.object_type}}</td>
+      <td>{{subscription.aspect_type}}</td>
+      <td>{{subscription.created_at|date:"c"}}</td>
+      <td>{{subscription.updated_at|date:"c"}}</td>
+    <tr>
+{% endfor %}
+  </tbody>
+</table>
+<script>
+$('#subscriptions').ready(function() {
+  $('#subscriptions').DataTable();
+});
+</script>
+{% else %}
+<form class="form-horizontal" action="./webhook" method="POST">
+{% csrf_token %}
+<button class="btn btn-primary" type="submit" name="enable_webhook">Enable Webhooks</button>
+</form>
+{% endif %}
+{% endblock %}
