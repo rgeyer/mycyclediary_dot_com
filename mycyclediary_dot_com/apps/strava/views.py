@@ -175,19 +175,39 @@ def webhook(request):
 
         ### Request a subscription from the API
         uri = "https://api.strava.com/api/v3/push_subscriptions"
-        body = "client_id={}&client_secret={}&object_type=activity&aspect_type=create&callback_url={}&verify_token={}".format(
-            SOCIAL_AUTH_STRAVA_KEY,
-            SOCIAL_AUTH_STRAVA_SECRET,
-            "https://app.mycyclediary.com/api/strava/webhook",
-            new_sub.verify_token,
-        )
+        body = {
+            "client_id": SOCIAL_AUTH_STRAVA_KEY,
+            "client_secret": SOCIAL_AUTH_STRAVA_SECRET,
+            "object_type": "activity",
+            "aspect_type": "create",
+            "callback_url":"https://app.mycyclediary.com/api/strava/webhook",
+            "verify_token": new_sub.verify_token,
+        }
         headers = {"content-type": "application/x-www-form-urlencoded"}
         session = Session()
         webhook_response = session.post(uri, headers=headers, data=urllib.urlencode(body))
         # TODO: Error handling, and other smart stuff
+        logger = logging.getLogger(__name__)
+        print_request(webhook_response, logger)
 
 
-    subscriptions = strava_webhook_subscription.objects.filter(athlete=request.user.id)
+    subscriptions = strava_webhook_subscription.objects.filter(athlete=request.user.id,strava_id__isnull=False)
     template_fields["subscriptions"] = subscriptions
 
     return render_to_response('strava/templates/strava_webhook.html', template_fields, context_instance=RequestContext(request))
+
+
+def print_request(response, logger):
+    logger.debug('{}\n{}\n{}\n\n{}'.format(
+        '-----------REQUEST-----------',
+        response.request.method + ' ' + response.request.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in response.request.headers.items()),
+        response.request.body,
+    ))
+
+
+    logger.debug('{}\n{}\n\n{}'.format(
+        '-----------RESPONSE-----------',
+        '\n'.join('{}: {}'.format(k, v) for k, v in response.headers.items()),
+        response.text,
+    ))
