@@ -11,8 +11,13 @@ def strava_webhook_callback(request):
 
     # This is a subscribe validation request
     if request.method == 'GET':
-        #if request.GET['hub.mode'] == 'subscribe':
         logger.debug("Strava webhook validation request.. {}".format(json.dumps(request.GET)))
+        if 'hub.mode' in request.GET and request.GET['hub.mode'] == 'subscribe':
+            obj = {
+                "hub.challenge": request.GET['hub.challenge']
+            }
+            response.write(json.dumps(obj))
+        #if request.GET['hub.mode'] == 'subscribe':
 
     # This is an actual callback
     if request.method == 'POST':
