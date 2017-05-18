@@ -1,4 +1,5 @@
 {% extends "www/templates/layout.html" %}
+{% load template_filters %}
 {% block title %}My Cycle Diary - Strava Activities{% endblock %}
 {% block head %}
 <script>
@@ -8,7 +9,7 @@ $(document).ready(function() {
     paging: true,
     data: [
 {% for activity in activities %}
-      ["{{activity.start_date_local}}","{{activity.type}}","{{activity.name}}","{{activity.distance}}","{{activity.elapsed_time}}"],
+      ["{{activity.start_date_local}}","{{activity.type}}","{{activity.name}}","{{activity.distance|meters_to_miles}}","{{activity.elapsed_time|seconds_to_hours}}"],
 {% endfor %}
     ]
   });

@@ -1,4 +1,5 @@
 Django>=1.8,<1.10
+djangorestframework
 stravalib
 python-memcached
 pymongo>=3.2
