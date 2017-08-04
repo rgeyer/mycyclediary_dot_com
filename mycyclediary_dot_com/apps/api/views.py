@@ -10,7 +10,7 @@ def index(request):
 def strava_webhook_callback(request):
     response = HttpResponse()
     logger = logging.getLogger(__name__)
-    logger.debug("Recieved Strava Webhook API Request")
+    logger.debug("Received Strava Webhook API Request")
 
     # This is a subscribe validation request
     if request.method == 'GET':
