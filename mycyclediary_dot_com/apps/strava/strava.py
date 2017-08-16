@@ -13,6 +13,7 @@ class strava:
 
     def __init__(self, access_token=None):
         self.logger = logging.getLogger(__name__)
+        self.client = None
         if access_token:
             self.set_access_token(access_token)
 

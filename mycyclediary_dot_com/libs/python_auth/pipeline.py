@@ -1,4 +1,5 @@
 from mycyclediary_dot_com.apps.strava.tasks import *
+import logging
 
 def user_details(strategy, details, user=None, *args, **kwargs):
 
@@ -8,6 +9,8 @@ def user_details(strategy, details, user=None, *args, **kwargs):
             provider = user.social_auth.get(provider='strava')
             if provider:
                 user.strava_id = provider.uid
+                # The username should be the email
+                user.username = user.email
                 updated = True
                 if 'access_token' in provider.extra_data.keys():
                     user.strava_api_token = user.social_auth.get(provider='strava').extra_data['access_token']

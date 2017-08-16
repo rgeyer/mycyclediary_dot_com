@@ -1,10 +1,12 @@
-{% extends "www/templates/layout.html" %}
+{% extends "www/templates/layout.html"%}
+{% block navbar %}{% with active="activities" %}{{ block.super }}{% endwith %}{% endblock %}
 {% load template_filters %}
 {% block title %}My Cycle Diary - Strava Activities{% endblock %}
 {% block head %}
 <script>
 $(document).ready(function() {
   $('#activities').DataTable({
+    order: [[0,"dsc"]],
     ordering: true,
     paging: true,
     data: [

@@ -17,3 +17,4 @@
 * Add maintenance log for equipment
 * Setup Strava webhooks to get new activities
   * What happens when an activity is updated?
+* Fix navbar to properly highlight the "active" page

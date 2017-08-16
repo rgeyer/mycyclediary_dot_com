@@ -29,10 +29,6 @@ class Command(BaseCommand):
             print json.dumps(json.loads(webhook_response.text), sort_keys=True, indent=4, separators=(',', ': '))
         if action == 'register':
             uuid_hex = uuid.uuid1().hex
-            new_sub = strava_webhook_subscription(
-                verify_token=uuid_hex,
-            )
-            new_sub.save()
 
             ### Request a subscription from the API
             uri = "https://api.strava.com/api/v3/push_subscriptions"
@@ -42,7 +38,7 @@ class Command(BaseCommand):
                 "object_type": "activity",
                 "aspect_type": "create",
                 "callback_url":"https://app.mycyclediary.com/api/strava/webhook",
-                "verify_token": new_sub.verify_token,
+                "verify_token": uuid_hex,
             }
             headers = {"content-type": "application/x-www-form-urlencoded"}
             session = Session()

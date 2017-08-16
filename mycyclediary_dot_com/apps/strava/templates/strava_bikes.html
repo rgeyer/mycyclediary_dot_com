@@ -1,0 +1,15 @@
+{% extends "www/templates/layout.html" %}{% block navbar %}
+{% with active="bikes" %}{{ block.super }}{% endwith %}{% endblock %}
+{% load template_filters %}
+{% block title %}My Cycle Diary - Strava Bikes{% endblock %}
+{% block body %}
+
+Strava Id: {{ athlete.strava_id }}
+Id: {{ athlete.id }}
+
+<ul>
+{% for bikeid, bike in bikes.iteritems %}
+  <li>{{bike.bike.name}}: {{bike.distance}} {{bike.elevation}}</li>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -113,6 +113,7 @@ def update_athlete(athlete):
         db_bike.brand_name = api_bike.brand_name
         db_bike.model_name = api_bike.model_name
         db_bike.frame_type = api_bike.frame_type
+        db_bike.aquisition_distance_meters = 0
         logger.debug("After setting all the stuff for a bike")
         db_bike.save()
         logger.debug("After saving the bike")
