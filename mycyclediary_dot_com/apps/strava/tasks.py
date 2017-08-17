@@ -98,12 +98,14 @@ def update_athlete(athlete):
 
     bikes,shoes = stravahelper.get_athlete_gear_api()
 
-    logger.debug("Updating athlete gear. Found {} bikes and {} shoes, iterating them now.".format(len(bikes), len(shoes)))
+    logger.debug("Updating athlete gear. Found {} bikes and {} shoes, iterating them now.".format(len(bikes), len(shoes)))    
 
     for api_bike in bikes:
-        logger.debug("Before instantiating a bike")
+        existing_db_bike = bike.objects.get(strava_id=api_bike.id)
         db_bike = bike()
-        logger.debug("After instantiating a bike")
+        if existing_db_bike:
+            db_bike = existing_db_bike
+
         db_bike.strava_id = api_bike.id
         db_bike.athlete = athlete
         db_bike.primary = api_bike.primary

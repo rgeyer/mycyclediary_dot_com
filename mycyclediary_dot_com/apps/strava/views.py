@@ -132,7 +132,7 @@ def bikes(request):
             {'field': 'athlete.id', 'query': request.user.strava_id},
             {'field': 'gear_id', 'query': bike.strava_id},
         ]
-        activities = activities = stra.get_activities_mongo(filters)
+        activities = stra.get_activities_mongo(filters)
         template_fields["bikes"][bike.strava_id] = {
             "bike": bike,
         }

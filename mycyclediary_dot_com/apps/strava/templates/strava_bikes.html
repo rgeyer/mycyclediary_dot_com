@@ -4,9 +4,6 @@
 {% block title %}My Cycle Diary - Strava Bikes{% endblock %}
 {% block body %}
 
-Strava Id: {{ athlete.strava_id }}
-Id: {{ athlete.id }}
-
 <ul>
 {% for bikeid, bike in bikes.iteritems %}
   <li>{{bike.bike.name}}: {{bike.distance}} {{bike.elevation}}</li>
