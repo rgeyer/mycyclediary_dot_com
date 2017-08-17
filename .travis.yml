@@ -1,10 +1,7 @@
 language: python
 python:
-  - "2.7"
-  - "3.2"
-  - "3.3"
-virtualenv:
-  system_site_packages: true
+  - 2.7
+  - 3.6
 env:
   - CYCLEDIARYCACHE_1_PORT_11211_TCP_PORT=1 CYCLEDIARYCACHE_1_PORT_11211_TCP_ADDR=0.0.0.0 CYCLEDIARYQUEUE_1_PORT_5672_TCP_PORT=1 CYCLEDIARYQUEUE_1_PORT_5672_TCP_ADDR=0.0.0.0
 install:
