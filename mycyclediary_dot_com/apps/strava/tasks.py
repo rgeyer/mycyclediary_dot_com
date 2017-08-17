@@ -4,6 +4,7 @@ from mycyclediary_dot_com.celery import app
 from mycyclediary_dot_com.apps.strava.strava import strava
 from mycyclediary_dot_com.apps.strava.models import *
 from mycyclediary_dot_com.apps.strava.mongohelper import mongohelper
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.utils import timezone
 
@@ -98,13 +99,14 @@ def update_athlete(athlete):
 
     bikes,shoes = stravahelper.get_athlete_gear_api()
 
-    logger.debug("Updating athlete gear. Found {} bikes and {} shoes, iterating them now.".format(len(bikes), len(shoes)))    
+    logger.debug("Updating athlete gear. Found {} bikes and {} shoes, iterating them now.".format(len(bikes), len(shoes)))
 
     for api_bike in bikes:
-        existing_db_bike = bike.objects.get(strava_id=api_bike.id)
-        db_bike = bike()
-        if existing_db_bike:
-            db_bike = existing_db_bike
+        db_bike = None
+        try:
+            db_bike = bike.objects.get(strava_id=api_bike.id)
+        except ObjectDoesNotExist:
+            db_bike = bike()
 
         db_bike.strava_id = api_bike.id
         db_bike.athlete = athlete
@@ -116,8 +118,6 @@ def update_athlete(athlete):
         db_bike.model_name = api_bike.model_name
         db_bike.frame_type = api_bike.frame_type
         db_bike.aquisition_distance_meters = 0
-        logger.debug("After setting all the stuff for a bike")
         db_bike.save()
-        logger.debug("After saving the bike")
 
     athlete.save()
