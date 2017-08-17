@@ -123,11 +123,6 @@ def bikes(request):
     logger = logging.getLogger(__name__)
     template_fields = {
         'bikes': {},
-        'activities': [],
-        'athlete': {
-            'strava_id': request.user.strava_id,
-            'id': request.user.id,
-        },
     }
 
     stra = strava()
@@ -137,39 +132,24 @@ def bikes(request):
             {'field': 'athlete.id', 'query': request.user.strava_id},
             {'field': 'gear_id', 'query': bike.strava_id},
         ]
-        activities = stra.aggregate_activities_mongo(filters, {
-            '_id': None,
-            'distance': {'$sum': '$distance'},
-            'elapsed_time': {'$sum': '$moving_time'},
-            'elevation': {'$sum': '$total_elevation_gain'},
-            'average_speed': {'$avg': '$average_speed'},
-            'kilojoules': {'$sum': '$kilojoules'},
-        })
-
-        template_fields['bikes'][bike.strava_id] = {
-            'bike': bike,
-            'distance': unithelper.miles(unit('m')(0)),
-            'time': unithelper.hours(unit('s')(0)),
-            'elevation': unithelper.meters(unit('m')(0)),
-            'avg_speed': unithelper.mph(unit('m')(0)/unit('s')(1)),
-            'kjs': 0,
+        activities = activities = stra.get_activities_mongo(filters)
+        template_fields["bikes"][bike.strava_id] = {
+            "bike": bike,
         }
+        distance = 0
+        time = 0
+        elevation = 0
+        avg_speed = 0
+        kjs = 0
 
-        activity = None
-        for agg in activities:
-            if not activity:
-                activity = agg
+        for activity in activities:
+            if 'distance' in activity:
+                distance += activity['distance']
+            if 'total_elevation_gain' in activity:
+                elevation += activity['total_elevation_gain']
 
-        if activity:
-            merge_dict = template_fields['bikes'][bike.strava_id].copy()
-            merge_dict.update({
-                'distance': unithelper.miles(unit('m')(activity['distance'])),
-                'time': unithelper.hours(unit('s')(activity['elapsed_time'])),
-                'elevation': unithelper.meters(unit('m')(activity['elevation'])),
-                'avg_speed': unithelper.mph(unit('m')(activity['average_speed'])/unit('s')(1)),
-                'kjs': activity['kilojoules'],
-            })
-            template_fields['bikes'][bike.strava_id] = merge_dict
+        template_fields["bikes"][bike.strava_id]["distance"] = unithelper.miles(unit('m')(distance))
+        template_fields["bikes"][bike.strava_id]["elevation"] = unithelper.meters(unit('m')(elevation))
 
     return render_to_response('strava/templates/strava_bikes.html', template_fields, context_instance=RequestContext(request))
 
