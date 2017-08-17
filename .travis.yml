@@ -6,6 +6,5 @@ env:
   - CYCLEDIARYCACHE_1_PORT_11211_TCP_PORT=1 CYCLEDIARYCACHE_1_PORT_11211_TCP_ADDR=0.0.0.0 CYCLEDIARYQUEUE_1_PORT_5672_TCP_PORT=1 CYCLEDIARYQUEUE_1_PORT_5672_TCP_ADDR=0.0.0.0
 install:
   - "pip install -r requirements/test.txt"
-  - "pip install https://github.com/rgeyer/python-fitparse/tarball/master"
   - "cp ./mycyclediary_dot_com/settings/secrets.py.example ./mycyclediary_dot_com/settings/secrets.py"
 script: "./manage.py test"
