@@ -1,4 +1,7 @@
 # mycyclediary_dot_com
+[![Coverage Status](https://coveralls.io/repos/github/rgeyer/mycyclediary_dot_com/badge.svg)](https://coveralls.io/github/rgeyer/mycyclediary_dot_com)
+
+[![Build Status](https://travis-ci.org/rightscale-cookbooks/marker.svg?branch=master)](https://travis-ci.org/rightscale-cookbooks/marker)
 
 # Stuff it can/should do
 * Strava monthly/weekly goals

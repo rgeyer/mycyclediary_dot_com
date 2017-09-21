@@ -1,3 +1,4 @@
+sudo: false
 language: python
 python:
   - 2.7
@@ -7,4 +8,9 @@ env:
 install:
   - "pip install -r requirements/test.txt"
   - "cp ./mycyclediary_dot_com/settings/secrets.py.example ./mycyclediary_dot_com/settings/secrets.py"
-script: "./manage.py test"
+script:
+  - coverage run manage.py test
+after_success:
+  - coveralls
+after_script:
+  - pylint mycyclediary_dot_com

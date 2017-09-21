@@ -1,1 +1,4 @@
 -r common.txt
+pylint
+coverage
+coveralls
