@@ -2,3 +2,5 @@
 pylint
 coverage
 coveralls
+pytest-django
+pytest-mongodb

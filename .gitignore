@@ -5,3 +5,15 @@ mycyclediary_dot_com_sqlite3
 mongobkup
 .DS_Store
 ._*
+.coverage
+.cache
+
+*.sqlite3
+
+node_modules/
+
+mycyclediary_dot_com/static/bower_components/
+
+dist/
+
+staticfiles/

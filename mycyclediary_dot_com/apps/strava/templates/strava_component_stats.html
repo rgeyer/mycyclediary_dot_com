@@ -4,13 +4,13 @@
 {% if not user.last_strava_sync %}
 <h1>Still loading your data, try reloading in a sec</h1>
 {% else %}
-<form class="form-horizontal" action="./bike_stats" method="POST">
+<form class="form-horizontal" action="./component_stats" method="POST">
 {% csrf_token %}
   <div class="form-group">
-    <label for="gear_id">Bike</label>
-    <select name="gear_id" class="form-control">
-    {% for bike in bikes %}
-      <option value="{{ bike.strava_id }}"{% if gear_id == bike.strava_id %} selected{% endif %}>{{ bike.name }}</option>
+    <label for="component_id">Bike</label>
+    <select name="component_id" class="form-control">
+    {% for comp in components %}
+      <option value="{{ comp.id }}"{% if component_id == comp.id %} selected{% endif %}>{{ comp.name }}</option>
     {% endfor %}
     </select>
   </div>

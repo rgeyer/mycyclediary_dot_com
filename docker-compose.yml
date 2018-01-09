@@ -21,7 +21,7 @@ cyclediaryweb:
   build: .
   command: python manage.py runserver 0.0.0.0:80
   environment:
-    - VIRTUAL_HOST=app.mycyclediary.com
+    - VIRTUAL_HOST=localdev.mycyclediary.com
   volumes:
     - .:/code
   expose:
@@ -30,3 +30,14 @@ cyclediaryweb:
     - cyclediarycache
     - cyclediarymongo1
     - cyclediaryqueue
+cyclediarytest:
+  build: .
+  command: coverage run /usr/local/bin/pytest -v
+  volumes:
+    - .:/code
+  environment:
+    - MONGO_MOCK=true
+    - CYCLEDIARYCACHE_1_PORT_11211_TCP_PORT=1
+    - CYCLEDIARYCACHE_1_PORT_11211_TCP_ADDR=0.0.0.0
+    - CYCLEDIARYQUEUE_1_PORT_5672_TCP_PORT=1
+    - CYCLEDIARYQUEUE_1_PORT_5672_TCP_ADDR=0.0.0.0

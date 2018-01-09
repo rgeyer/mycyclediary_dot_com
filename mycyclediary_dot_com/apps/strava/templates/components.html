@@ -8,7 +8,7 @@
 {% for component in components %}
       <a href="#" class="list-group-item">
         <h4 class="list-group-item-heading">{{ component.name }}</h4>
-        <p class="list-group-item-text">{{brand_name}} {{model_name}}</p>
+        <p class="list-group-item-text">{{component.brand_name}} {{component.model_name}} {{component.aggregates.meters_distance}}</p>
       </a>
 {% endfor %}
     </div>

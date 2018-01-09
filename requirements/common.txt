@@ -1,9 +1,10 @@
-Django>=1.8,<1.10
+Django<2.0
 djangorestframework
+drf-nested-routers
+coreapi
 stravalib
 python-memcached
 pymongo>=3.2
 jsonpickle
-python-social-auth==0.2.14
 celery>=3.1.23,<4.0
 django-celery

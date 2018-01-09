@@ -1,16 +1,7 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+from mycyclediary_dot_com.apps.strava.mongohelper import mongohelper
 
-Replace this with more appropriate tests for your application.
-"""
-
-from django.test import TestCase
-
-
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+def test_mongo_fixture_record_count(mongodb):
+    assert 'raw_activities_resource_state_2' in mongodb.collection_names()
+    records = mongodb.raw_activities_resource_state_2.find()
+    record_count = records.count()
+    assert record_count == 80

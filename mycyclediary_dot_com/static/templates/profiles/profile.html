@@ -1,0 +1,9 @@
+<div class="profile" ng-show="vm.profile">
+  <div class="jumbotron profile__header">
+    <h1 class="profile__username">{{ vm.profile.username }}</h1>
+    <p class="profile__tagline">{{ vm.profile.last_strava_sync }}</p>
+    <a href="/profile/settings" class="btn btn-primary">
+      Edit
+    </a>
+  </div>
+</div>

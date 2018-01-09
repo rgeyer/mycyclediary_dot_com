@@ -1,15 +1,13 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 import mycyclediary_dot_com.apps.www.views
+from rest_framework.documentation import include_docs_urls
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = [
-    url('', include('social.apps.django_app.urls', namespace='social')),
-    url('', include('django.contrib.auth.urls', namespace='auth')),
-    url(r'^$', mycyclediary_dot_com.apps.www.views.index, name='index'),
-    url(r'^strava/', include('mycyclediary_dot_com.apps.strava.urls')),
+    # url(r'^strava/', include('mycyclediary_dot_com.apps.strava.urls')),
     url(r'^api/', include('mycyclediary_dot_com.apps.api.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -18,6 +16,8 @@ urlpatterns = [
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^connect', mycyclediary_dot_com.apps.www.views.login, name='login'),
-    url(r'^logout', mycyclediary_dot_com.apps.www.views.logout),
+    # url(r'^connect', mycyclediary_dot_com.apps.www.views.login, name='login'),
+    # url(r'^logout', mycyclediary_dot_com.apps.www.views.logout),
+    url(r'^api_docs', include_docs_urls(title='MyCycleDiary API Docs')),
+    url(r'^.*$', mycyclediary_dot_com.apps.www.views.index, name='index'),
 ]

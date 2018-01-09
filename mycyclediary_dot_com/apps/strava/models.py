@@ -1,5 +1,34 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from mycyclediary_dot_com.apps.strava.strava import strava as stra
+from mycyclediary_dot_com.apps.core.data import bike_stats
+
+import logging
+
+class athleteManager(BaseUserManager):
+    def create_user(self, email, password=None, **kwargs):
+        if not email:
+            raise ValueError('Users must have a valid email address.')
+
+        if not kwargs.get('username'):
+            raise ValueError('Users must have a valid username.')
+
+        athlete = self.model(
+            email=self.normalize_email(email), username=kwargs.get('username')
+        )
+
+        athlete.set_password(password)
+        athlete.save()
+
+        return athlete
+
+    def create_superuser(self, email, password, **kwargs):
+        athlete = self.create_user(email, password, **kwargs)
+
+        athlete.is_admin = True
+        athlete.save()
+
+        return athlete
 
 class athlete(AbstractUser):
     class Meta:
@@ -13,6 +42,8 @@ class athlete(AbstractUser):
     # That happens only on new logins, and needs to be updated. Maybe this needs
     # to be checked dynamically?
     # Ahhh this is how that happens.. https://github.com/omab/python-social-auth/blob/v0.2.14/social/backends/strava.py
+
+    objects = athleteManager()
 
 class component(models.Model):
     class Meta:
@@ -42,6 +73,41 @@ class component(models.Model):
         BATTERY_TYPE_REPLACEABLE: 'Replaceable'
     }
 
+    def find_bike(self):
+        if self.isGear() and self.gear.isBike():
+            return self
+        else:
+            for bComp in self.parent_component_set.all():
+                if bComp.parent_component.isGear() and bComp.parent_component.gear.isBike():
+                    return bComp.parent_component
+                else:
+                    return bComp.parent_component.find_bike()
+
+    def get_aggregates(self, strava=None, start_date=None, end_date=None):
+        if not strava:
+            strava = stra()
+        bike = self.find_bike()
+        if bike == self:
+            return strava.get_bike_stats(self.athlete.strava_id, self.gear.strava_id, start_date=start_date, end_date=end_date)
+        else:
+            aggs = bike_stats()
+            # Find all time frames where this component was associated with a
+            # bike, or with a parent component which was associated with a bike
+            for comp_association in self.parent_component_set.all():
+                adjusted_start = comp_association.start_date
+                if start_date and start_date > adjusted_start:
+                    adjusted_start = start_date
+
+                adjusted_end = comp_association.end_date if comp_association.end_date else end_date
+                if end_date and end_date < adjusted_end:
+                    adjusted_end = end_date
+
+                bike = comp_association.component.find_bike()
+                this_aggs = strava.get_bike_stats(bike.athlete.strava_id, bike.gear.strava_id, adjusted_start, adjusted_end)
+                aggs = aggs + this_aggs
+
+            return aggs
+
     def battery_str(self):
         try:
             batt_type = component.battery_types[self.battery_type]
@@ -49,13 +115,22 @@ class component(models.Model):
         except KeyError:
             return component.battery_types[component.BATTERY_TYPE_UNKNOWN]
 
-
     def isGear(self):
         try:
             # Just access it
             foo = self.gear
             return True
         except:
+            return False
+
+    def isBike(self):
+        if self.isGear():
+            try:
+                foo = self.gear.bike
+                return True
+            except:
+                return False
+        else:
             return False
 
     def __str__(self):
@@ -109,7 +184,7 @@ class component_component(models.Model):
         app_label = 'mycyclediary_dot_com'
 
     athlete = models.ForeignKey(athlete, on_delete=models.CASCADE)
-    component = models.ForeignKey('component',on_delete=models.CASCADE,related_name='child_component_set')
+    component = models.ForeignKey('component',on_delete=models.CASCADE,related_name='parent_component_set')
     start_date = models.DateTimeField(blank=False,null=False)
     end_date = models.DateTimeField(blank=True,null=True)
-    parent_component = models.ForeignKey('component',blank=True,null=True,on_delete=models.SET_NULL,related_name='parent_component_set')
+    parent_component = models.ForeignKey('component',blank=True,null=True,on_delete=models.SET_NULL,related_name='child_component_set')

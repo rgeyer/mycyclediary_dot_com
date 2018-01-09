@@ -26,7 +26,7 @@ class Command(BaseCommand):
             webhook_response = session.get(uri)
             # TODO: Error handling, and other smart stuff
             HttpHelper.print_request(webhook_response, logger)
-            print json.dumps(json.loads(webhook_response.text), sort_keys=True, indent=4, separators=(',', ': '))
+            print(json.dumps(json.loads(webhook_response.text), sort_keys=True, indent=4, separators=(',', ': ')))
         if action == 'register':
             uuid_hex = uuid.uuid1().hex
 
@@ -45,4 +45,4 @@ class Command(BaseCommand):
             webhook_response = session.post(uri, headers=headers, data=urllib.urlencode(body))
             # TODO: Error handling, and other smart stuff
             HttpHelper.print_request(webhook_response, logger)
-            print json.dumps(json.loads(webhook_response.text), sort_keys=True, indent=4, separators=(',', ': '))
+            print(json.dumps(json.loads(webhook_response.text), sort_keys=True, indent=4, separators=(',', ': ')))

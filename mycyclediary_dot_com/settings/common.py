@@ -11,9 +11,7 @@ BROKER_URL='amqp://guest:guest@'+os.environ['CYCLEDIARYQUEUE_1_PORT_5672_TCP_ADD
 # BROKER_URL='amqp://guest:guest@localhost//'
 CELERY_IMPORTS=("mycyclediary_dot_com.apps.strava.tasks",)
 
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
-
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', True)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -59,7 +57,7 @@ ALLOWED_HOSTS = ['app.mycyclediary.com','localdev.mycyclediary.com','127.0.0.1']
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'UTC'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -168,66 +166,24 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'social.apps.django_app.default',
     'djcelery',
+    'rest_framework',
+    'rest_framework.authtoken',
 )
 
-AUTHENTICATION_BACKENDS = [
-    'social.backends.strava.StravaOAuth',
-    'django.contrib.auth.backends.ModelBackend',
-]
+# AUTHENTICATION_BACKENDS = [
+#     'social.backends.strava.StravaOAuth',
+#     'django.contrib.auth.backends.ModelBackend',
+# ]
 
 AUTH_USER_MODEL = 'mycyclediary_dot_com.athlete'
 
-SOCIAL_AUTH_PIPELINE = (
-    # Get the information we can about the user and return it in a simple
-    # format to create the user instance later. On some cases the details are
-    # already part of the auth response from the provider, but sometimes this
-    # could hit a provider API.
-    'social.pipeline.social_auth.social_details',
-
-    # Get the social uid from whichever service we're authing thru. The uid is
-    # the unique identifier of the given user in the provider.
-    'social.pipeline.social_auth.social_uid',
-
-    # Verifies that the current auth process is valid within the current
-    # project, this is were emails and domains whitelists are applied (if
-    # defined).
-    'social.pipeline.social_auth.auth_allowed',
-
-    # Checks if the current social-account is already associated in the site.
-    'social.pipeline.social_auth.social_user',
-
-    # Make up a username for this person, appends a random string at the end if
-    # there's any collision.
-    'social.pipeline.user.get_username',
-
-    # Send a validation email to the user to verify its email address.
-    # 'social.pipeline.mail.mail_validation',
-
-    # Associates the current social details with another user account with
-    # a similar email address.
-    # 'social.pipeline.social_auth.associate_by_email',
-
-    # Create a user account if we haven't found one yet.
-    'social.pipeline.user.create_user',
-
-    # Create the record that associated the social account with this user.
-    'social.pipeline.social_auth.associate_user',
-
-    # Populate the extra_data field in the social record with the values
-    # specified by settings (and the default ones like access_token, etc).
-    'social.pipeline.social_auth.load_extra_data',
-
-    # Update the user record with any changed info from the auth service.
-    'social.pipeline.user.user_details',
-
-    # Duplicate some stuff from the Strava user principle into the athlete model
-    'mycyclediary_dot_com.libs.python_auth.pipeline.user_details',
-
-    # Do the initial strava sync if it hasn't been done already
-    'mycyclediary_dot_com.libs.python_auth.pipeline.first_sync',
-)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

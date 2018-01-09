@@ -1,21 +1,26 @@
 from stravalib.client import Client
+from stravalib import unithelper
+from units import unit
 from mycyclediary_dot_com.apps.strava.mongohelper import mongohelper
+from mycyclediary_dot_com.apps.core.data import bike_stats
 import logging
 
 class strava:
+    """A utility class for communicating with the Strava API, as well as some
+    as well as fetching raw Strava activities from the MongoDB.
 
-    # def _assemble_mongo_filters(self, filters):
-    #     filter_dict = {}
-    #     for filter in filters:
-    #         filter_dict[filter['field']] = filter['query']
-    #
-    #     return filter_dict
+    Todo:
+        * Probably break out the mongo bits to a more appropriate library.
+    """
 
-    def __init__(self, access_token=None):
+
+    def __init__(self, access_token=None, mongodb=None):
         self.logger = logging.getLogger(__name__)
         self.client = None
         if access_token:
             self.set_access_token(access_token)
+
+        self.__mongoh = mongohelper(mongodb)
 
     def set_access_token(self, access_token):
         self.client = Client(access_token=access_token)
@@ -67,11 +72,62 @@ class strava:
         return activities
 
     def get_activities_mongo(self, filters=[]):
-        mongoh = mongohelper()
-        mongo = mongoh.get_collection('raw_activities_resource_state_2')
-        return mongoh.filter(mongo,filters)
+        mongo = self.__mongoh.get_collection('raw_activities_resource_state_2')
+        return self.__mongoh.filter(mongo,filters)
 
     def aggregate_activities_mongo(self, filters=[], aggregate={}):
-        mongoh = mongohelper()
-        mongo = mongoh.get_collection('raw_activities_resource_state_2')
-        return mongoh.aggregate(mongo, filters, aggregate)
+        mongo = self.__mongoh.get_collection('raw_activities_resource_state_2')
+        return self.__mongoh.aggregate(mongo, filters, aggregate)
+
+    def get_bike_stats(self, athlete_id, bike_id, start_date=None, end_date=None):
+        """Returns aggregated usage info about a given bike.
+
+        Args:
+            athlete_id (int): The ODM primary key of the athlete
+            bike_id (str): The Strava "gear_id"
+            start_date(:obj:`datetime`, optional): Beginning of a date range to
+                search for activities.
+            end_date(:obj:`datetime`, optional): End of a date range to search
+                for activities
+
+        Returns:
+            An `mycyclediary_dot_com.apps.core.data.bike_stats` object
+        """
+
+        retval = bike_stats()
+
+        filters = [
+            {'field': 'athlete.id', 'query': athlete_id},
+            {'field': 'gear_id', 'query': bike_id},
+        ]
+        if end_date == None and start_date != None:
+            filters.append({'field': 'start_date', 'query': {'$gte': start_date}})
+        elif end_date != None and start_date == None:
+            filters.append({'field': 'start_date', 'query': {'$lt': end_date}})
+        elif end_date != None and start_date != None:
+            filters.append({'field': 'start_date', 'query': {'$lt': end_date, '$gte': start_date}})
+
+        activities = self.aggregate_activities_mongo(filters, {
+            '_id': None,
+            'distance': {'$sum': '$distance'},
+            'elapsed_time': {'$sum': '$moving_time'},
+            'elevation': {'$sum': '$total_elevation_gain'},
+            'average_speed': {'$avg': '$average_speed'},
+            'kilojoules': {'$sum': '$kilojoules'},
+            'records': {'$sum': 1},
+        })
+
+        activity = None
+        for agg in activities:
+            if not activity:
+                activity = agg
+
+        if activity != None:
+            retval.meters_distance = activity['distance']
+            retval.time = activity['elapsed_time']
+            retval.meters_elevation = activity['elevation']
+            retval.meters_per_second_avg_speed = activity['average_speed']
+            retval.kjs = activity['kilojoules']
+            retval.records = activity['records']
+
+        return retval
