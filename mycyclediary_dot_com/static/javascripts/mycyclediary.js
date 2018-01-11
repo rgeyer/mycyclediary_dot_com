@@ -10,7 +10,8 @@
       'mycyclediary.utils',
       'mycyclediary.profiles',
       'mycyclediary.activities',
-      'mycyclediary.component'
+      'mycyclediary.component',
+      'ngMaterial'
     ]);
 
   angular
