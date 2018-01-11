@@ -1,15 +1,23 @@
-<div class="row">
-  <div class="col-sm-12">
-    <div class="well">
-      <div class="component">
-        <div class="component__meta">
-          {{ component.name }}
-        </div>
-
-        <div class="component__content">
-          {{ component.battery_str }}
-        </div>
-      </div>
+<md-card md-theme="default">
+  <md-card-title>
+    <md-card-title-text>
+      <span class="md-headline">{{ component.name }}</span>
+      <span class="md-subhead">{{ component.brand_name }} {{ component.model_name }}</span>
+    </md-card-title-text>
+    <md-card-title-media>
+      <div class="md-media-lg card-media"></div>
+    </md-card-title-media>
+  </md-card-title>
+  <md-card-actions layout="row" layout-align="end center">
+    <div layout="row">
+      <md-icon style="color: black;" md-svg-src="/static/svg/si-glyph-mountain.svg" aria-label="climb-icon"></md-icon>
+      <span>100 meters</span>
     </div>
-  </div>
-</div>
+    <div layout="row">
+      <md-icon style="color: black;" md-svg-src="/static/svg/si-glyph-road.svg" aria-label="distance-icon"></md-icon>
+      <span>3000 miles</span>
+    </div>
+    <md-button>Edit</md-button>
+    <md-button>Something</md-button>
+  </md-card-actions>
+</md-card>
