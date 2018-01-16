@@ -5,7 +5,7 @@ from mycyclediary_dot_com.apps.strava.models import athlete, component
 class AthleteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     confirm_password = serializers.CharField(write_only=True, required=False)
-    
+
     def create(self, validated_data):
         return athlete.objects.create(**validated_data)
 
@@ -31,8 +31,8 @@ class AthleteSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'username', 'date_joined', 'last_login',
                   'first_name', 'last_name', 'password', 'is_superuser',
                   'is_staff', 'is_active', 'last_strava_sync', 'strava_id',
-                  'confirm_password',)
-        read_only_fields = ('strava_id',)
+                  'confirm_password', 'strava_auth_redirect_uri', 'strava_connected',)
+        read_only_fields = ('strava_id','strava_auth_redirect_uri', 'strava_connected',)
 
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:

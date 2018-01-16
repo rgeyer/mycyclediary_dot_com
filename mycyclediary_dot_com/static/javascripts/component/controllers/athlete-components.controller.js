@@ -28,7 +28,7 @@
     * @memberOf mycyclediary.component.controllers.AthleteComponentController
     */
     function activate() {
-      Component.all().then(componentsSuccessFn, componentsErrorFn);
+      Component.components().then(componentsSuccessFn, componentsErrorFn);
 
       $scope.$on('component.created', function (event, component) {
         vm.components.unshift(component);

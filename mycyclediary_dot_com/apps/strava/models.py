@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from mycyclediary_dot_com.settings.secrets import *
 from mycyclediary_dot_com.apps.strava.strava import strava as stra
 from mycyclediary_dot_com.apps.core.data import bike_stats
 
-import logging
+import logging,urllib,os
 
 class athleteManager(BaseUserManager):
     def create_user(self, email, password=None, **kwargs):
@@ -44,6 +45,19 @@ class athlete(AbstractUser):
     # Ahhh this is how that happens.. https://github.com/omab/python-social-auth/blob/v0.2.14/social/backends/strava.py
 
     objects = athleteManager()
+
+    def strava_auth_redirect_uri(self):
+        strava_auth_uri = "https://www.strava.com/oauth/authorize"
+        params = {
+            "client_id": SOCIAL_AUTH_STRAVA_KEY,
+            "redirect_uri": "https://{}/strava/authcallback".format(os.environ.get('VIRTUAL_HOST', 'localhost')),
+            "response_type": "code",
+            "scope": "view_private"
+        }
+        return "{}?{}".format(strava_auth_uri, urllib.parse.urlencode(params))
+
+    def strava_connected(self):
+        return self.strava_api_token != None
 
 class component(models.Model):
     class Meta:

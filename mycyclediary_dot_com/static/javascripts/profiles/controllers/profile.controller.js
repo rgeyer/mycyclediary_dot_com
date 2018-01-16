@@ -9,12 +9,12 @@
     .module('mycyclediary.profiles.controllers')
     .controller('ProfileController', ProfileController);
 
-  ProfileController.$inject = ['$location', '$routeParams', 'Authentication', 'Profile', 'Snackbar'];
+  ProfileController.$inject = ['$location', '$routeParams', 'Authentication', 'Profile', 'Snackbar', 'Strava'];
 
   /**
   * @namespace ProfileController
   */
-  function ProfileController($location, $routeParams, Authentication, Profile, Snackbar) {
+  function ProfileController($location, $routeParams, Authentication, Profile, Snackbar, Strava) {
     var vm = this;
 
     vm.profile = undefined;
@@ -54,6 +54,18 @@
       function profileErrorFn(data, status, headers, config) {
         $location.url('/');
         Snackbar.error('That user does not exist.');
+      }
+    }
+
+    vm.strava_deauthorize = function() {
+      Strava.deauthorize().then(deauthorizeSuccessFn, deauthorizeErrorFn)
+
+      function deauthorizeSuccessFn(data, status, headers, config) {
+        vm.profile.strava_connected = false;
+      }
+
+      function deauthorizeErrorFn(data,status,headers,config) {
+        Snackbar.error(data.data.message);
       }
     }
   }

@@ -4,7 +4,7 @@ from mycyclediary_dot_com.apps.strava.models import *
 from requests import * # Maybe wanna use django requests, but I'm so much more familiar with these!
 from mycyclediary_dot_com.libs.http_helper import *
 
-import urllib, uuid, logging, json
+import urllib, uuid, logging, json, os
 
 class Command(BaseCommand):
     help = 'Manages the strava webhook'
@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 "client_secret": SOCIAL_AUTH_STRAVA_SECRET,
                 "object_type": "activity",
                 "aspect_type": "create",
-                "callback_url":"https://app.mycyclediary.com/api/strava/webhook",
+                "callback_url":"https://{}/api/strava/webhook/".format(os.environ.get('VIRTUAL_HOST', 'localhost')),
                 "verify_token": uuid_hex,
             }
             headers = {"content-type": "application/x-www-form-urlencoded"}

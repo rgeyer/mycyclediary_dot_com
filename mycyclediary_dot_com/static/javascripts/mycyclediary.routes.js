@@ -36,6 +36,10 @@
       controller: 'AthleteComponentController',
       controllerAs: 'vm',
       templateUrl: '/static/templates/component/athlete-components.html'
+    }).when('/strava/authcallback', {
+      controller: 'StravaAuthCallbackController',
+      controllerAs: 'vm',
+      templateUrl: '/static/templates/strava/authcallback.html'
     }).otherwise('/');
   }
 })();

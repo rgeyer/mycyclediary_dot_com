@@ -5,38 +5,100 @@ from django.contrib.auth import authenticate, login, logout
 
 from rest_framework import viewsets, permissions, status, views
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, detail_route
+from rest_framework.decorators import api_view, detail_route, list_route
 
+from stravalib.client import Client
+
+from requests.exceptions import *
+
+from mycyclediary_dot_com.settings.secrets import *
 from mycyclediary_dot_com.apps.strava.models import athlete,component
 from mycyclediary_dot_com.apps.strava.strava import strava
 from mycyclediary_dot_com.apps.api.serializers import AthleteSerializer,ComponentSerializer,BikeStatSerializer
 from mycyclediary_dot_com.apps.api.permissions import IsAthleteOwner
 
-@api_view()
-def index(request):
-    return HttpResponse('Hello, API is alive!')
+class StravaViewSet(viewsets.ViewSet):
+    def get_permissions(self):
+        return (permissions.IsAuthenticated(),)
 
-@api_view(['GET','POST'])
-def strava_webhook_callback(request):
-    response = HttpResponse()
-    logger = logging.getLogger(__name__)
-    logger.debug("Received Strava Webhook API Request")
+    @list_route(methods=['get','post'])
+    def webhook(self, request):
+        logger = logging.getLogger(__name__)
+        logger.debug("Received Strava Webhook API Request")
 
-    # This is a subscribe validation request
-    if request.method == 'GET':
-        logger.debug("Strava webhook validation request.. {}".format(json.dumps(request.GET)))
-        if 'hub.mode' in request.GET and request.GET['hub.mode'] == 'subscribe':
-            obj = {
-                "hub.challenge": request.GET['hub.challenge']
-            }
-            response.write(json.dumps(obj))
+        # This is a subscribe validation request
+        if request.method == 'GET':
+            logger.debug("Strava webhook validation request.. {}".format(json.dumps(request.query_params)))
+            if 'hub.mode' in request.query_params and 'hub.challenge' in request.query_params:
+                if request.query_params['hub.mode'] == 'subscribe':
+                    obj = {
+                        "hub.challenge": request.query_params['hub.challenge']
+                    }
+                    return Response(obj)
+                else:
+                    return Response({
+                        'status': 'Bad Request',
+                        'message': 'Invalid hub.mode {}'.format(request.query_params['hub.mode'])
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({
+                    'status': 'Bad Request',
+                    'message': 'Validation request requires query parameters named "hub.mode" and "hub.challenge"'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-    # This is an actual callback
-    if request.method == 'POST':
-        logger.debug("Got a strava callback.. {}".format(json.dumps(request.data)))
-        response.write('Yay, thanks for the callback!')
+        # This is an actual callback
+        if request.method == 'POST':
+            logger.debug("Got a strava callback.. {}".format(json.dumps(request.data)))
+            return Response({"Yay, thanks for the webhook"})
 
-    return response
+        return Response()
+
+    @list_route(methods=['post'])
+    def token_exchange(self, request):
+        if 'code' in request.data:
+            try:
+                strava_client = Client()
+                response = strava_client.exchange_code_for_token(SOCIAL_AUTH_STRAVA_KEY, SOCIAL_AUTH_STRAVA_SECRET, request.data['code'])
+                leet = athlete.objects.get(pk=request.user.pk)
+                leet.strava_api_token = response
+                leet.save()
+            except HTTPError as e:
+                code = e.args[0][:3]
+                message = e.args[0][3:]
+                return Response({
+                    'status': code,
+                    'message': message
+                }, status=int(code))
+        else:
+            return Response({
+                'status': 'Bad Request',
+                'message': '"code" is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({}, status.HTTP_201_CREATED)
+
+    @list_route(methods=['get'])
+    def deauthorize(self, request):
+        if request.user.strava_api_token:
+            try:
+                strava_client = Client(access_token=request.user.strava_api_token)
+                response = strava_client.deauthorize()
+                request.user.strava_api_token = None
+                request.user.save()
+            except HTTPError as e:
+                code = e.args[0][:3]
+                message = e.args[0][3:]
+                return Response({
+                    'status': code,
+                    'message': message
+                }, status=int(code))
+        else:
+            return Response({
+                'status': 'Bad Request',
+                'message': 'User does not have a valid Strava access_token.'
+            }, status.HTTP_400_BAD_REQUEST)
+
+        return Response({}, status.HTTP_204_NO_CONTENT)
 
 class AthleteViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
@@ -108,7 +170,28 @@ class ComponentViewSet(viewsets.ModelViewSet):
         return(permissions.IsAuthenticated(),)
 
     def list(self, request):
-        queryset = self.queryset.filter(athlete=self.request.user)
+        # athlete=self.request.user,gear__isnull=False,gear__bike__isnull=False
+        filters={"athlete": self.request.user}
+        if 'filter' in request.query_params:
+            for f in str.split(request.query_params['filter'],','):
+                tuples=str.split(f, '=')
+                key = tuples[0]
+                value = tuples[-1]
+                if key == 'type':
+                    if value == 'bike':
+                        filters.update({"gear__isnull":False,"gear__bike__isnull":False})
+                    elif value == 'shoe':
+                        filters.update({"gear__isnull":False,"gear__shoe__isnull":False})
+                    elif value == 'component':
+                        filters.update({"gear__isnull":True})
+                    else:
+                        return Response({
+                            'status': 'Bad request',
+                            'message': 'Can not filter by type "{}". Possible type filters are [bike,shoe,component]'.format(value)
+                        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+        queryset = self.queryset.select_related().filter(**filters)
         serializer = self.serializer_class(queryset, many=True)
 
         return Response(serializer.data)

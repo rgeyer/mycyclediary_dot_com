@@ -11,6 +11,7 @@
       'mycyclediary.profiles',
       'mycyclediary.activities',
       'mycyclediary.component',
+      'mycyclediary.strava',
       'ngMaterial'
     ]);
 

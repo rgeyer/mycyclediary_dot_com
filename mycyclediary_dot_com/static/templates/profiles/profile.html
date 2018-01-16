@@ -2,6 +2,14 @@
   <div class="jumbotron profile__header">
     <h1 class="profile__username">{{ vm.profile.username }}</h1>
     <p class="profile__tagline">{{ vm.profile.last_strava_sync }}</p>
+    <md-button class="md-fab md-primary" aria-label="Connect Strava" ng-hide="vm.profile.strava_connected" ng-href="{{ vm.profile.strava_auth_redirect_uri }}">
+      <md-tooltip md-direction="top">Connect with Strava</md-tooltip>
+      <md-icon class="icon-gray" md-svg-src="/static/svg/strava-icon.svg"></md-icon>
+    </md-button>
+    <md-button class="md-fab md-primary" aria-label="Disconnect Strava" ng-hide="!vm.profile.strava_connected" ng-href="#" ng-click="vm.strava_deauthorize()">
+      <md-tooltip md-direction="top">Deauthorize Strava</md-tooltip>
+      <md-icon class="icon-strava" md-svg-src="/static/svg/strava-icon.svg"></md-icon>
+    </md-button>
     <a href="/profile/settings" class="btn btn-primary">
       Edit
     </a>
