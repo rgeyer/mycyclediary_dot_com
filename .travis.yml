@@ -9,7 +9,7 @@ install:
   - "pip install -r requirements/test.txt"
   - "cp ./mycyclediary_dot_com/settings/secrets.py.example ./mycyclediary_dot_com/settings/secrets.py"
 script:
-  - coverage run pytest
+  - coverage run /usr/local/bin/pytest
 after_success:
   - coveralls
 after_script:
