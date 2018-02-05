@@ -6,6 +6,6 @@ class Command(BaseCommand):
     help = "Finds everything in the resource_state_2 collection which hasn't resource_state_3 details fetched, and fetches it."
 
     def handle(self, *args, **options):
-        leets = athlete.objects.all()
+        leets = Athlete.objects.all()
         for leet in leets:
             upgrade_athlete_activity_resource_states.delay(leet)

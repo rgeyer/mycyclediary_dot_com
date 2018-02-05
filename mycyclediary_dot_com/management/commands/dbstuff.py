@@ -6,6 +6,6 @@ class Command(BaseCommand):
     help = 'Does DB Stuff'
 
     def handle(self, *args, **options):
-        leets = athlete.objects.all()
+        leets = Athlete.objects.all()
         for leet in leets:
             update_athlete.delay(leet)

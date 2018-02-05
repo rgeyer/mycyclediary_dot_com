@@ -176,7 +176,7 @@ INSTALLED_APPS = (
 #     'django.contrib.auth.backends.ModelBackend',
 # ]
 
-AUTH_USER_MODEL = 'mycyclediary_dot_com.athlete'
+AUTH_USER_MODEL = 'mycyclediary_dot_com.Athlete'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

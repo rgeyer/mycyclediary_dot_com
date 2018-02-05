@@ -1,12 +1,15 @@
+# _*_ coding: utf-8 _*_
+"""Django Models for the "strava" sub-app of mycyclediary_dot_com"""
+import urllib
+import os
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from mycyclediary_dot_com.settings.secrets import *
+from mycyclediary_dot_com.settings.secrets import SOCIAL_AUTH_STRAVA_KEY
 from mycyclediary_dot_com.apps.strava.strava import strava as stra
 from mycyclediary_dot_com.apps.core.data import bike_stats
 
-import logging,urllib,os
-
-class athleteManager(BaseUserManager):
+class AthleteManager(BaseUserManager):
     def create_user(self, email, password=None, **kwargs):
         if not email:
             raise ValueError('Users must have a valid email address.')
@@ -31,26 +34,23 @@ class athleteManager(BaseUserManager):
 
         return athlete
 
-class athlete(AbstractUser):
+class Athlete(AbstractUser):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
-    strava_id = models.PositiveIntegerField(blank=True,null=True,db_index=True)
-    last_strava_sync = models.DateTimeField(blank=True,null=True)
-    last_api_callback = models.DateTimeField(blank=True,null=True)
-    strava_api_token = models.CharField(blank=True,null=True,max_length=64)
-    # This apparently also get's a "gear_set" associated with it somewhere.
-    # That happens only on new logins, and needs to be updated. Maybe this needs
-    # to be checked dynamically?
-    # Ahhh this is how that happens.. https://github.com/omab/python-social-auth/blob/v0.2.14/social/backends/strava.py
+    strava_id = models.PositiveIntegerField(blank=True, null=True, db_index=True)
+    last_strava_sync = models.DateTimeField(blank=True, null=True)
+    last_api_callback = models.DateTimeField(blank=True, null=True)
+    strava_api_token = models.CharField(blank=True, null=True, max_length=64)
 
-    objects = athleteManager()
+    objects = AthleteManager()
 
     def strava_auth_redirect_uri(self):
         strava_auth_uri = "https://www.strava.com/oauth/authorize"
         params = {
             "client_id": SOCIAL_AUTH_STRAVA_KEY,
-            "redirect_uri": "https://{}/strava/authcallback".format(os.environ.get('VIRTUAL_HOST', 'localhost')),
+            "redirect_uri": "https://{}/strava/authcallback".\
+                format(os.environ.get('VIRTUAL_HOST', 'localhost')),
             "response_type": "code",
             "scope": "view_private"
         }
@@ -63,16 +63,16 @@ class component(models.Model):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
-    athlete = models.ForeignKey(athlete, on_delete=models.CASCADE)
+    athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    description = models.CharField(blank=True,null=True,max_length=255)
-    brand_name = models.CharField(blank=True,null=True,max_length=255)
-    model_name = models.CharField(blank=True,null=True,max_length=255)
-    notes = models.TextField(blank=True,null=True)
-    aquisition_date = models.DateTimeField(blank=True,null=True)
-    aquisition_distance_meters = models.FloatField(blank=False,null=False)
-    retire_date = models.DateTimeField(blank=True,null=True)
-    battery_type = models.PositiveSmallIntegerField(null=False,blank=False,default=1)
+    description = models.CharField(blank=True, null=True, max_length=255)
+    brand_name = models.CharField(blank=True, null=True, max_length=255)
+    model_name = models.CharField(blank=True, null=True, max_length=255)
+    notes = models.TextField(blank=True, null=True)
+    aquisition_date = models.DateTimeField(blank=True, null=True)
+    aquisition_distance_meters = models.FloatField(blank=False, null=False)
+    retire_date = models.DateTimeField(blank=True, null=True)
+    battery_type = models.PositiveSmallIntegerField(null=False, blank=False, default=1)
 
     # Battery type "constants"
     BATTERY_TYPE_UNKNOWN = 0
@@ -102,7 +102,12 @@ class component(models.Model):
             strava = stra()
         bike = self.find_bike()
         if bike == self:
-            return strava.get_bike_stats(self.athlete.strava_id, self.gear.strava_id, start_date=start_date, end_date=end_date)
+            return strava.get_bike_stats(
+                self.athlete.strava_id,
+                self.gear.strava_id,
+                start_date=start_date,
+                end_date=end_date
+            )
         else:
             aggs = bike_stats()
             # Find all time frames where this component was associated with a
@@ -117,7 +122,12 @@ class component(models.Model):
                     adjusted_end = end_date
 
                 bike = comp_association.component.find_bike()
-                this_aggs = strava.get_bike_stats(bike.athlete.strava_id, bike.gear.strava_id, adjusted_start, adjusted_end)
+                this_aggs = strava.get_bike_stats(
+                    bike.athlete.strava_id,
+                    bike.gear.strava_id,
+                    adjusted_start,
+                    adjusted_end
+                )
                 aggs = aggs + this_aggs
 
             return aggs
@@ -151,10 +161,10 @@ class component(models.Model):
         return self.name
 
 class gear(component):
-    strava_id = models.CharField(max_length=16,db_index=True,blank=True,null=True)
+    strava_id = models.CharField(max_length=16, db_index=True, blank=True, null=True)
     primary = models.BooleanField(default=False)
     resource_state = models.PositiveSmallIntegerField(null=True)
-    frame_type = models.PositiveSmallIntegerField(null=True,blank=True)
+    frame_type = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def isBike(self):
         try:
@@ -172,19 +182,63 @@ class gear(component):
         except:
             return False
 
+    def get_activity_manifest(self, date, profile=None):
+        """Returns *this* component, and all (non recursive) child components
+        of this component for the specified date.
+
+        Args:
+            date (datetime): The datetime of an activity for which a component
+                manifest should be returned.
+            profile (:obj:`gear_component_profile`, optional): A component
+                profile which should be used to filter/substitute which
+                components to use.
+
+        Returns:
+            :obj:`list` of :obj:`component` including *this* component, and all
+                (non recursive) child components for the specified `date`,
+                modified by the specified `profile`
+        """
+        component_relationships = self.child_component_set.filter(
+            Q(start_date__lte=date),
+            Q(end_date__isnull=True) | Q(end_date__gte=date)
+        )
+        components = [self]
+        for component_rel in component_relationships:
+            components.append(component_rel.component)
+
+        if profile:
+            for add in profile.add_components.all():
+                components.append(add)
+
+            for remove in profile.remove_components.all():
+                components.remove(remove)
+
+        return components
+
 class bike(gear):
     pass
 
 class shoe(gear):
     pass
 
+class gear_component_profile(models.Model):
+    class Meta:
+        app_label = 'mycyclediary_dot_com'
+
+    gear = models.ForeignKey(gear, on_delete=models.CASCADE)
+    add_components = models.ManyToManyField(component, related_name='profile_add_components')
+    remove_components = models.ManyToManyField(component, related_name='profile_remove_components')
+
+# TODO: This is currently unused, and I believe it may be wise to delete it.
+# I'm keeping it around until I solve the issue of matching real activities with
+# components at a point in time.
 class activity_component(models.Model):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
-    athlete = models.ForeignKey(athlete, on_delete=models.CASCADE)
-    activity_id = models.BigIntegerField(blank=False,null=False,db_index=True)
-    component = models.ForeignKey('component',blank=True,null=True,on_delete=models.SET_NULL)
+    athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
+    activity_id = models.BigIntegerField(blank=False, null=False, db_index=True)
+    component = models.ForeignKey('component', blank=True, null=True, on_delete=models.SET_NULL)
 
 # This is used to determine "default" components associated with a particular
 # parent component, or gear (bike) for a given timespan.
@@ -197,8 +251,8 @@ class component_component(models.Model):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
-    athlete = models.ForeignKey(athlete, on_delete=models.CASCADE)
-    component = models.ForeignKey('component',on_delete=models.CASCADE,related_name='parent_component_set')
-    start_date = models.DateTimeField(blank=False,null=False)
-    end_date = models.DateTimeField(blank=True,null=True)
-    parent_component = models.ForeignKey('component',blank=True,null=True,on_delete=models.SET_NULL,related_name='child_component_set')
+    athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
+    component = models.ForeignKey('component', on_delete=models.CASCADE, related_name='parent_component_set')
+    start_date = models.DateTimeField(blank=False, null=False)
+    end_date = models.DateTimeField(blank=True, null=True)
+    parent_component = models.ForeignKey('component', blank=True, null=True, on_delete=models.SET_NULL, related_name='child_component_set')

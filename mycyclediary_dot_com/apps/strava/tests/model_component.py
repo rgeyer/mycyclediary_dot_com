@@ -127,3 +127,24 @@ def test_aggregate_on_wheelset1_start_date_and_end_date(db, django_db_setup, mon
     assert aggregates.meters_elevation == 500 * 8
     assert aggregates.kjs == 1000 * 8
     assert aggregates.meters_per_second_avg_speed > 8.0
+
+def test_get_gear_manifest_for_activity_no_profile(db, django_db_setup, mongodb):
+    activity_date = datetime.strptime('2017-10-12T23:59:59Z', '%Y-%m-%dT%H:%M:%SZ')
+    bike_gear = bike.objects.get(pk=3)
+    manifest = bike_gear.get_activity_manifest(activity_date)
+    assert len(manifest) == 2
+    manifest_ids = []
+    for cmp in manifest:
+        manifest_ids.append(cmp.id)
+    assert manifest_ids == [3,1]
+
+def test_get_gear_manifest_for_activity_with_profile(db, django_db_setup, mongodb):
+    activity_date = datetime.strptime('2017-10-12T23:59:59Z', '%Y-%m-%dT%H:%M:%SZ')
+    bike_gear = bike.objects.get(pk=3)
+    profile = gear_component_profile.objects.get(pk=1)
+    manifest = bike_gear.get_activity_manifest(activity_date, profile=profile)
+    assert len(manifest) == 2
+    manifest_ids = []
+    for cmp in manifest:
+        manifest_ids.append(cmp.id)
+    assert manifest_ids == [3,2]

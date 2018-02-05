@@ -125,5 +125,14 @@
         "end_date": null,
         "parent_component": 3
     }
+},
+{
+  "model": "mycyclediary_dot_com.gear_component_profile",
+  "pk": 1,
+  "fields": {
+    "gear": 3,
+    "add_components": [2],
+    "remove_components": [1]
+  }
 }
 ]

@@ -12,7 +12,7 @@ from stravalib.client import Client
 from requests.exceptions import *
 
 from mycyclediary_dot_com.settings.secrets import *
-from mycyclediary_dot_com.apps.strava.models import athlete,component
+from mycyclediary_dot_com.apps.strava.models import Athlete,component
 from mycyclediary_dot_com.apps.strava.strava import strava
 from mycyclediary_dot_com.apps.api.serializers import AthleteSerializer,ComponentSerializer,BikeStatSerializer
 from mycyclediary_dot_com.apps.api.permissions import IsAthleteOwner
@@ -59,7 +59,7 @@ class StravaViewSet(viewsets.ViewSet):
             try:
                 strava_client = Client()
                 response = strava_client.exchange_code_for_token(SOCIAL_AUTH_STRAVA_KEY, SOCIAL_AUTH_STRAVA_SECRET, request.data['code'])
-                leet = athlete.objects.get(pk=request.user.pk)
+                leet = Athlete.objects.get(pk=request.user.pk)
                 leet.strava_api_token = response
                 leet.save()
             except HTTPError as e:
@@ -102,7 +102,7 @@ class StravaViewSet(viewsets.ViewSet):
 
 class AthleteViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
-    queryset = athlete.objects.all()
+    queryset = Athlete.objects.all()
     serializer_class = AthleteSerializer
 
     def get_permissions(self):
@@ -119,7 +119,7 @@ class AthleteViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            athlete.objects.create_user(**serializer.validated_data)
+            Athlete.objects.create_user(**serializer.validated_data)
 
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
 

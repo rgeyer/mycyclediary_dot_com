@@ -9,7 +9,7 @@ from stravalib.client import Client
 from stravalib import unithelper
 from datetime import timedelta
 from mycyclediary_dot_com.settings.secrets import *
-from mycyclediary_dot_com.apps.strava.models import athlete, component
+from mycyclediary_dot_com.apps.strava.models import Athlete, component
 from mycyclediary_dot_com.apps.strava.models import bike as bike_odm
 from mycyclediary_dot_com.apps.strava.strava import strava
 from units import unit

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import *
 
-admin.site.register(athlete)
+admin.site.register(Athlete)
 
 @admin.register(gear, bike, shoe, component)
 class GearAdmin(admin.ModelAdmin):

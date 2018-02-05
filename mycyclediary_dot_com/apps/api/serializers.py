@@ -1,13 +1,13 @@
 from django.contrib.auth import update_session_auth_hash
 from rest_framework import serializers
-from mycyclediary_dot_com.apps.strava.models import athlete, component
+from mycyclediary_dot_com.apps.strava.models import Athlete, component
 
 class AthleteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     confirm_password = serializers.CharField(write_only=True, required=False)
 
     def create(self, validated_data):
-        return athlete.objects.create(**validated_data)
+        return Athlete.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.save()
@@ -27,7 +27,7 @@ class AthleteSerializer(serializers.ModelSerializer):
         return instance
 
     class Meta:
-        model = athlete
+        model = Athlete
         fields = ('id', 'email', 'username', 'date_joined', 'last_login',
                   'first_name', 'last_name', 'password', 'is_superuser',
                   'is_staff', 'is_active', 'last_strava_sync', 'strava_id',
