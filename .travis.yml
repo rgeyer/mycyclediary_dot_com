@@ -13,4 +13,4 @@ script:
 after_success:
   - coveralls
 after_script:
-  - pylint mycyclediary_dot_com
+  - pylint --rcfile .pylintrc mycyclediary_dot_com
