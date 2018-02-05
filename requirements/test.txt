@@ -1,5 +1,6 @@
 -r common.txt
 pylint
+pylint-django
 coverage
 coveralls
 pytest-django
