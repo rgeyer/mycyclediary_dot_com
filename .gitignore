@@ -7,6 +7,7 @@ mongobkup
 ._*
 .coverage
 .cache
+Pipfile*
 
 *.sqlite3
 

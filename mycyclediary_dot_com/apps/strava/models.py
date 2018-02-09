@@ -59,7 +59,7 @@ class Athlete(AbstractUser):
     def strava_connected(self):
         return self.strava_api_token != None
 
-class component(models.Model):
+class Component(models.Model):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
@@ -134,10 +134,10 @@ class component(models.Model):
 
     def battery_str(self):
         try:
-            batt_type = component.battery_types[self.battery_type]
+            batt_type = Component.battery_types[self.battery_type]
             return batt_type
         except KeyError:
-            return component.battery_types[component.BATTERY_TYPE_UNKNOWN]
+            return Component.battery_types[Component.BATTERY_TYPE_UNKNOWN]
 
     def isGear(self):
         try:
@@ -157,10 +157,73 @@ class component(models.Model):
         else:
             return False
 
+    def isShoe(self):
+        if self.isGear():
+            try:
+                foo = self.gear.shoe
+                return True
+            except:
+                return False
+        else:
+            return False
+
     def __str__(self):
         return self.name
 
-class gear(component):
+    def get_activity_manifest(self, date, profile=None):
+        """Returns *this* component, and all (non recursive) child components
+        of this component for the specified date.
+
+        Args:
+            date (datetime): The datetime of an activity for which a component
+                manifest should be returned.
+            profile (:obj:`GearComponentProfile`, optional): A component
+                profile which should be used to filter/substitute which
+                components to use.
+
+        Returns:
+            :obj:`list` of :obj:`component` including *this* component, and all
+                (non recursive) child components for the specified `date`,
+                modified by the specified `profile`
+        """
+        component_relationships = self.child_component_set.filter(
+            Q(start_date__lte=date),
+            Q(end_date__isnull=True) | Q(end_date__gte=date)
+        )
+        components = []
+        for component_rel in component_relationships:
+            components.append(component_rel.component)
+
+        # Add and remove once, for top level compoments (different wheelset)
+        if profile:
+            for add in profile.add_components.all():
+                components.append(add)
+
+            for remove in profile.remove_components.all():
+                if remove in components:
+                    components.remove(remove)
+
+        ret_components = components
+        for cmp in components:
+            # Note: Don't share the profile with the sub-component, since added
+            # components will be recusively (and infinitely) added. Instead,
+            # apply the profile after the recursive spelunking.
+            for child in cmp.get_activity_manifest(date):
+                if child not in ret_components:
+                    ret_components.append(child)
+
+        # Remove once more, to catch anything the profile might pull off
+        if profile:
+            for remove in profile.remove_components.all():
+                if remove in ret_components:
+                    ret_components.remove(remove)
+
+        # Finally add myself
+        ret_components.append(self)
+
+        return ret_components
+
+class Gear(Component):
     strava_id = models.CharField(max_length=16, db_index=True, blank=True, null=True)
     primary = models.BooleanField(default=False)
     resource_state = models.PositiveSmallIntegerField(null=True)
@@ -182,63 +245,19 @@ class gear(component):
         except:
             return False
 
-    def get_activity_manifest(self, date, profile=None):
-        """Returns *this* component, and all (non recursive) child components
-        of this component for the specified date.
-
-        Args:
-            date (datetime): The datetime of an activity for which a component
-                manifest should be returned.
-            profile (:obj:`gear_component_profile`, optional): A component
-                profile which should be used to filter/substitute which
-                components to use.
-
-        Returns:
-            :obj:`list` of :obj:`component` including *this* component, and all
-                (non recursive) child components for the specified `date`,
-                modified by the specified `profile`
-        """
-        component_relationships = self.child_component_set.filter(
-            Q(start_date__lte=date),
-            Q(end_date__isnull=True) | Q(end_date__gte=date)
-        )
-        components = [self]
-        for component_rel in component_relationships:
-            components.append(component_rel.component)
-
-        if profile:
-            for add in profile.add_components.all():
-                components.append(add)
-
-            for remove in profile.remove_components.all():
-                components.remove(remove)
-
-        return components
-
-class bike(gear):
+class Bike(Gear):
     pass
 
-class shoe(gear):
+class Shoe(Gear):
     pass
 
-class gear_component_profile(models.Model):
+class GearComponentProfile(models.Model):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
-    gear = models.ForeignKey(gear, on_delete=models.CASCADE)
-    add_components = models.ManyToManyField(component, related_name='profile_add_components')
-    remove_components = models.ManyToManyField(component, related_name='profile_remove_components')
-
-# TODO: This is currently unused, and I believe it may be wise to delete it.
-# I'm keeping it around until I solve the issue of matching real activities with
-# components at a point in time.
-class activity_component(models.Model):
-    class Meta:
-        app_label = 'mycyclediary_dot_com'
-
-    athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
-    activity_id = models.BigIntegerField(blank=False, null=False, db_index=True)
-    component = models.ForeignKey('component', blank=True, null=True, on_delete=models.SET_NULL)
+    gear = models.ForeignKey(Gear, on_delete=models.CASCADE)
+    add_components = models.ManyToManyField(Component, related_name='profile_add_components')
+    remove_components = models.ManyToManyField(Component, related_name='profile_remove_components')
 
 # This is used to determine "default" components associated with a particular
 # parent component, or gear (bike) for a given timespan.
@@ -247,12 +266,18 @@ class activity_component(models.Model):
 # parent component or bike for a given time. I.E. I use my Stages PM on both
 # my TT bike and my roadbike, and move them between those bikes. Thus that
 # component may be "associated" with both bikes for all time.
-class component_component(models.Model):
+class ComponentComponent(models.Model):
     class Meta:
         app_label = 'mycyclediary_dot_com'
 
     athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
-    component = models.ForeignKey('component', on_delete=models.CASCADE, related_name='parent_component_set')
+    component = models.ForeignKey('Component', on_delete=models.CASCADE, related_name='parent_component_set')
     start_date = models.DateTimeField(blank=False, null=False)
     end_date = models.DateTimeField(blank=True, null=True)
-    parent_component = models.ForeignKey('component', blank=True, null=True, on_delete=models.SET_NULL, related_name='child_component_set')
+    parent_component = models.ForeignKey('Component', blank=True, null=True, on_delete=models.SET_NULL, related_name='child_component_set')
+
+class Activity():
+    """A model/helper class for Strava activities stored in mongodb. This is most
+    certainly *NOT* a Django ORM model, but it seems to make sense to keep it in
+    this module.
+    """

@@ -1,1 +1,42 @@
-<components components="vm.components" ng-show="vm.components && vm.components.length"></components>
+<!--<div>-->
+<md-toolbar class="">
+  <div class="md-toolbar-tools">
+    <md-button class="md-icon-button" aria-label="Search" ng-click="vm.searchBox = !vm.searchBox">
+      <md-icon md-svg-icon="/static/svg/ic_search_black_24px.svg"></md-icon>
+    </md-button>
+    <input type="text" ng-show="vm.searchBox" style="color: black;"
+      ng-model="searchText" ng-keyup="vm.search()" />
+
+    <md-button ng-click="vm.clear_filter()">All</md-button>
+    <md-button ng-click="vm.filter_bikes()">Bikes</md-button>
+    <md-button ng-click="vm.filter_shoes()">Shoes</md-button>
+    <md-button ng-click="vm.filter_components()">Components</md-button>
+
+    <md-fab-speed-dial md-direction="down" md-open="vm.addDialOpen"
+      ng-mouseenter="vm.addDialOpen=true" ng-mouseleave="vm.addDialOpen=false"
+      class="md-scale md-fab-top-right">
+      <md-fab-trigger>
+        <md-button aria-label="Add..." class="md-fab md-warn">
+          <md-tooltip md-direction="left" md-visible="tooltipVisible">Add...</md-tooltip>
+          <md-icon md-svg-src="/static/svg/ic_add_black_24px.svg"></md-icon>
+        </md-button>
+      </md-fab-trigger>
+
+      <md-fab-actions>
+        <md-button aria-label="Bike" class="md-fab md-raised md-mini" ng-click="vm.new_bike($event)">
+          <md-tooltip md-direction="left" md-visible="tooltipVisible">Bike</md-tooltip>
+          <md-icon md-svg-src="/static/svg/if_bike_107227.svg" aria-label="Bike"></md-icon>
+        </md-button>
+        <md-button aria-label="Shoe" class="md-fab md-raised md-mini" ng-click="vm.new_shoe($event)">
+          <md-tooltip md-direction="left" md-visible="tooltipVisible">Shoe</md-tooltip>
+          <md-icon md-svg-src="/static/svg/if_icon-48-sports-shoe_316258.svg" aria-label="Shoe"></md-icon>
+        </md-button>
+        <md-button aria-label="Component" class="md-fab md-raised md-mini" ng-click="vm.new_component($event)">
+          <md-tooltip md-direction="left" md-visible="tooltipVisible">Component</md-tooltip>
+          <md-icon md-svg-src="/static/svg/if_icon-ios7-gear_211751.svg" aria-label="Component"></md-icon>
+        </md-button>
+      </md-fab-actions>
+    </md-fab-speed-dial>
+  </div>
+</md-toolbar>
+<components components="vm.filtered_components" ng-show="vm.filtered_components && vm.filtered_components.length"></components>

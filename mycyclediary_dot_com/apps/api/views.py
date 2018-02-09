@@ -12,9 +12,9 @@ from stravalib.client import Client
 from requests.exceptions import *
 
 from mycyclediary_dot_com.settings.secrets import *
-from mycyclediary_dot_com.apps.strava.models import Athlete,component
+from mycyclediary_dot_com.apps.strava.models import Athlete, Component, Bike, Shoe
 from mycyclediary_dot_com.apps.strava.strava import strava
-from mycyclediary_dot_com.apps.api.serializers import AthleteSerializer,ComponentSerializer,BikeStatSerializer
+from mycyclediary_dot_com.apps.api.serializers import AthleteSerializer, ComponentSerializer, BikeStatSerializer
 from mycyclediary_dot_com.apps.api.permissions import IsAthleteOwner
 
 class StravaViewSet(viewsets.ViewSet):
@@ -160,13 +160,10 @@ class AthleteViewSet(viewsets.ModelViewSet):
 
 class ComponentViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
-    queryset = component.objects.all()
+    queryset = Component.objects.all()
     serializer_class = ComponentSerializer
 
     def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return (permissions.AllowAny(),)
-
         return(permissions.IsAuthenticated(),)
 
     def list(self, request):

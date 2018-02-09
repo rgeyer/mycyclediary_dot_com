@@ -86,6 +86,38 @@
     }
 },
 {
+    "model": "mycyclediary_dot_com.component",
+    "pk": 5,
+    "fields": {
+        "athlete": 1,
+        "name": "Cassette 1 (11-25)",
+        "description": null,
+        "brand_name": null,
+        "model_name": null,
+        "notes": null,
+        "aquisition_date": null,
+        "aquisition_distance_meters": 0.0,
+        "retire_date": null,
+        "battery_type": 1
+    }
+},
+{
+    "model": "mycyclediary_dot_com.component",
+    "pk": 6,
+    "fields": {
+        "athlete": 1,
+        "name": "Cassette 2 (11-32)",
+        "description": null,
+        "brand_name": null,
+        "model_name": null,
+        "notes": null,
+        "aquisition_date": null,
+        "aquisition_distance_meters": 0.0,
+        "retire_date": null,
+        "battery_type": 1
+    }
+},
+{
     "model": "mycyclediary_dot_com.gear",
     "pk": 3,
     "fields": {
@@ -116,7 +148,7 @@
     "fields": {}
 },
 {
-    "model": "mycyclediary_dot_com.component_component",
+    "model": "mycyclediary_dot_com.componentcomponent",
     "pk": 1,
     "fields": {
         "athlete": 1,
@@ -127,12 +159,32 @@
     }
 },
 {
-  "model": "mycyclediary_dot_com.gear_component_profile",
+    "model": "mycyclediary_dot_com.componentcomponent",
+    "pk": 2,
+    "fields": {
+        "athlete": 1,
+        "component": 5,
+        "start_date": "2016-12-31T00:00:00Z",
+        "end_date": null,
+        "parent_component": 1
+    }
+},
+{
+  "model": "mycyclediary_dot_com.gearcomponentprofile",
   "pk": 1,
   "fields": {
     "gear": 3,
     "add_components": [2],
     "remove_components": [1]
+  }
+},
+{
+  "model": "mycyclediary_dot_com.gearcomponentprofile",
+  "pk": 2,
+  "fields": {
+    "gear": 3,
+    "add_components": [6],
+    "remove_components": [5]
   }
 }
 ]

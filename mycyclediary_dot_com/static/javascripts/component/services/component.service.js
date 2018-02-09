@@ -25,6 +25,9 @@
       bikes: bikes,
       shoes: shoes,
       components: components,
+      create: create,
+      get: get,
+      aggregates: aggregates,
     };
 
     return Component;
@@ -79,6 +82,29 @@
     */
     function components() {
       return list('component');
+    }
+
+    function create(component_type, name, description, brand_name, model_name, notes, aquisition_date, aquisition_distance_meters, retire_date, battery_type) {
+      return $http.post('/api/components/',{
+        component_type: component_type,
+        name: name,
+        description: description,
+        brand_name: brand_name,
+        model_name: model_name,
+        notes: notes,
+        aquisition_date: aquisition_date,
+        aquisition_distance_meters: aquisition_distance_meters,
+        retire_date: retire_date,
+        battery_type: battery_type
+      });
+    }
+
+    function get(id) {
+      return $http.get('/api/components/{}/'+id);
+    }
+
+    function aggregates(id, start_date, end_date) {
+      return $http.post('/api/components/'+id+'/aggregates/', {start_date: start_date, end_date: end_date});
     }
   }
 })();

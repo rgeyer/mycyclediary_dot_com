@@ -104,9 +104,9 @@ def update_athlete(athlete):
     for api_bike in bikes:
         db_bike = None
         try:
-            db_bike = bike.objects.get(strava_id=api_bike.id)
+            db_bike = Bike.objects.get(strava_id=api_bike.id)
         except ObjectDoesNotExist:
-            db_bike = bike()
+            db_bike = Bike()
 
         db_bike.strava_id = api_bike.id
         db_bike.athlete = athlete

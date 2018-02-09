@@ -1,0 +1,60 @@
+<md-dialog aria-label="New Bike Dialog">
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <form role="form" ng-submit="vm.submit()">
+        <div>
+          <md-input-container>
+            <label>Name</label>
+            <input required placeholder="Name" ng-model="vm.name"/>
+          </md-input-container>
+        </div>
+
+        <div>
+          <md-input-container>
+            <label>Description</label>
+            <input placeholder="Description" ng-model="vm.description"/>
+          </md-input-container>
+        </div>
+
+        <div layout="row">
+          <md-input-container>
+            <label>Brand Name</label>
+            <input placeholder="Brand Name" ng-model="vm.brand_name"/>
+          </md-input-container>
+          <md-input-container>
+            <label>Model Name</label>
+            <input placeholder="Model Name" ng-model="vm.model_name"/>
+          </md-input-container>
+        </div>
+
+        <div layout="row">
+          <md-input-container>
+            <label>Aquisition Date</label>
+            <md-datepicker ng-model="vm.aquisition_date"></md-datepicker>
+          </md-input-container>
+          <md-input-container>
+            <label>Aquisition Distance Meters</label>
+            <input required placeholder="Aquisition Distance Meters" ng-model="vm.aquisition_distance_meters"/>
+          </md-input-container>
+        </div>
+
+        <div layout="row">
+          <md-input-container>
+            <md-checkbox ng-model="vm.battery" aria-label="Has Battery?">
+              Has Battery?
+            </md-checkbox>
+            <md-checkbox ng-show="vm.battery" ng-model="vm.battery_rechargable" aria-label="Battery Rechargeable?">
+              Battery is rechargable?
+            </md-checkbox>
+          </md-input-container>
+        </div>
+
+        <div>
+          <md-button type="submit">
+            Submit
+          </md-button>
+        </div>
+      </form>
+    </div>
+  </md-dialog-content>
+</md-dialog>

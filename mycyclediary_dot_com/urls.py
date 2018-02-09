@@ -7,7 +7,6 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = [
-    # url(r'^strava/', include('mycyclediary_dot_com.apps.strava.urls')),
     url(r'^api/', include('mycyclediary_dot_com.apps.api.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
