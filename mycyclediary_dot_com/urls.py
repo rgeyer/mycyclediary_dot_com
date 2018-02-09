@@ -15,8 +15,6 @@ urlpatterns = [
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-    # url(r'^connect', mycyclediary_dot_com.apps.www.views.login, name='login'),
-    # url(r'^logout', mycyclediary_dot_com.apps.www.views.logout),
     url(r'^api_docs', include_docs_urls(title='MyCycleDiary API Docs')),
     url(r'^.*$', mycyclediary_dot_com.apps.www.views.index, name='index'),
 ]
