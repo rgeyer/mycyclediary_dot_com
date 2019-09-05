@@ -43,6 +43,11 @@ angular-datatables@^v0.6.0:
     datatables.net-dt "^1.10.11"
     jquery ">=1.11.0"
 
+angular-material@^1.1.20:
+  version "1.1.20"
+  resolved "https://registry.yarnpkg.com/angular-material/-/angular-material-1.1.20.tgz#138def4a4f3982fddfa7788c9775e663f12cba85"
+  integrity sha512-R2jILX9g7AVvEZbIMqEp8mkjlH/iSrDG150pCSzL7+6PHdi4dYuyXNRtYlpYKe+72Q4fIV4YBYSxepNob3hU9A==
+
 angular@>=1.7.0, angular@^1.7.8:
   version "1.7.8"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.7.8.tgz#b77ede272ce1b261e3be30c1451a0b346905a3c9"
@@ -299,6 +304,11 @@ bootstrap-material-design@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/bootstrap-material-design/-/bootstrap-material-design-4.1.2.tgz#d6f282f1248c6ce2959c69ca86afe113ee128e88"
   integrity sha512-hKeUkOM6g2DqpktvEMHrIDpQ5qupV4DSeKlJSJ60tLFQ+8tPlszVCa3JVLTV+ZFbJRMb0UA6UWTsnjW57kYNeg==
+
+bootstrap@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.3.1.tgz#280ca8f610504d99d7b6b4bfc4b68cec601704ac"
+  integrity sha512-rXqOmH1VilAt2DyPzluTi2blhk17bO7ef+zLLPlWvG494pDxcM234pJ8wTc/6R40UWizAIIMgxjvxZg5kmsbag==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -2043,6 +2053,11 @@ ng-annotate@~0.13.0:
     stringmap "~0.2.2"
     stringset "~0.2.1"
     tryor "~0.1.2"
+
+ng-dialog@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/ng-dialog/-/ng-dialog-1.4.0.tgz#3f81330e7caac614e99fbceb76f304bf820c413e"
+  integrity sha1-P4EzDnyqxhTpn7zrdvMEv4IMQT4=
 
 node-pre-gyp@^0.12.0:
   version "0.12.0"

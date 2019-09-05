@@ -12,7 +12,7 @@ gulp.task('mycyclediary', function () {
 
 gulp.task('yarn', function () {
   return gulp.src(['./package.json', './yarn.lock'])
-    .pipe(gulp.dest('./mycyclediary_dot_com/dist'))
+    .pipe(gulp.dest('./mycyclediary_dot_com/static/dist'))
     .pipe(yarn({ production: true }));
 });
 
