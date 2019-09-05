@@ -6,20 +6,22 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rgeyer/mycyclediary_dot_com.git"
-  },
-  "author": "",
+  "repository": "https://github.com/rgeyer/mycyclediary_dot_com.git",
+  "author": "Ryan Geyer <me@ryangeyer.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/rgeyer/mycyclediary_dot_com/issues"
   },
   "homepage": "https://github.com/rgeyer/mycyclediary_dot_com",
   "dependencies": {
-    "bower": "^1.3.12",
-    "gulp": "^3.8.9",
+    "angular": "^1.7.8",
+    "angular-datatables": "^v0.6.0",
+    "bootstrap-material-design": "^4.1.2",
+    "gulp": "^4.0.0",
     "gulp-ng-annotate": "^0.3.3",
     "gulp-uglify": "^1.0.1"
+  },
+  "devDependencies": {
+    "gulp-yarn": "^2.0.0"
   }
 }

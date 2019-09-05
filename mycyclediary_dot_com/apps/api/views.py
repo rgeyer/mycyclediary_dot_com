@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 
 from rest_framework import viewsets, permissions, status, views
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, detail_route, list_route
+from rest_framework.decorators import api_view, action
 
 from stravalib.client import Client
 
@@ -21,7 +21,7 @@ class StravaViewSet(viewsets.ViewSet):
     def get_permissions(self):
         return (permissions.IsAuthenticated(),)
 
-    @list_route(methods=['get','post'])
+    @action(detail=False, methods=['get','post'])
     def webhook(self, request):
         logger = logging.getLogger(__name__)
         logger.debug("Received Strava Webhook API Request")
@@ -53,7 +53,7 @@ class StravaViewSet(viewsets.ViewSet):
 
         return Response()
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post'])
     def token_exchange(self, request):
         if 'code' in request.data:
             try:
@@ -77,7 +77,7 @@ class StravaViewSet(viewsets.ViewSet):
 
         return Response({}, status.HTTP_201_CREATED)
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get'])
     def deauthorize(self, request):
         if request.user.strava_api_token:
             try:
@@ -199,7 +199,7 @@ class ComponentViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def aggregates(self, request, pk=None):
         start_date = None
         end_date = None
