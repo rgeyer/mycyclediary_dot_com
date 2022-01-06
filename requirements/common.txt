@@ -6,5 +6,5 @@ stravalib
 python-memcached
 pymongo>=3.2
 jsonpickle
-celery>=3.1.23,<4.0
+celery>=3.1.23,<6.0
 django-celery
